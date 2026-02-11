@@ -93,7 +93,7 @@ export default function Portfolio() {
           "Developed product vision, narrative and concept positioning.",
         ],
         thumb: "/images/thumb_stroll.jpg",
-        link: "#stroll",
+        link: "/stroll",
       },
       {
         id: "dms",
@@ -145,10 +145,21 @@ export default function Portfolio() {
 
   // --- Layout knobs: 3x3 grid, 6 tiles + 3 empty
   const grid: GridSize = { cols: 3, rows: 3 };
-  const cell = 180; // tile size (slightly smaller for 3x3)
-  const gap = 18;
   const totalCells = grid.cols * grid.rows; // 9
   const activeCellIndex = 8; // bottom-right = active tile
+
+  // Board fills first-half width; cell/gap derived from measured container
+  const boardWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [boardContainerWidth, setBoardContainerWidth] = useState(576);
+  useEffect(() => {
+    const el = boardWrapperRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setBoardContainerWidth(el.offsetWidth));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const cell = boardContainerWidth / (grid.cols + (grid.cols - 1) * 0.1); // 3 cells + 2 gaps (gap = cell*0.1)
+  const gap = cell * 0.1;
 
   // puzzle state: tile -> cellIndex (6 tiles; 3 cells empty at 4,6,7)
   const [tilePos, setTilePos] = useState<Record<string, number>>(() => {
@@ -408,23 +419,34 @@ export default function Portfolio() {
     onBoardPointerUp(e);
   };
 
+  const shuffleTiles = () => {
+    const indices = Array.from({ length: totalCells }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    const next: Record<string, number> = {};
+    tiles.forEach((t, i) => (next[t.id] = indices[i]));
+    setTilePos(next);
+  };
+
   return (
     <div ref={rootRef} className="h-screen w-screen overflow-hidden bg-white text-[#111]">
-      <div className="mx-auto flex h-full max-w-[1240px] flex-col px-12 py-10">
-        {/* TOP BAND: "Currently on display" + puzzle board */}
-        <div className="flex w-full items-start gap-10">
-          {/* Left: label + puzzle */}
-          <div className="flex min-w-0 flex-1 flex-col">
-            <div data-entrance className="flex items-center gap-3 text-[12px] font-medium text-[#111]/80">
-              <NumberBadge n={0} />
-              <span>Currently on display</span>
-            </div>
+      <div className="flex h-full">
+        {/* Left half: puzzle full height; right padding matches second half left */}
+        <div className="flex min-w-0 flex-1 flex-col py-10 pl-12 pr-12">
+          <div data-entrance className="flex items-center gap-3 text-[12px] font-medium text-[#111]/80">
+            <NumberBadge n={0} />
+            <span>Currently on display</span>
+          </div>
 
-            <div className="mt-5">
-              <div
-                ref={boardRef}
-                data-entrance
-                className="relative select-none"
+          <div className="mt-5 flex flex-1 min-h-0 flex-col w-full min-w-0">
+            <div className="flex flex-1 items-center w-full min-w-0">
+              <div ref={boardWrapperRef} className="w-full min-w-0">
+                <div
+                  ref={boardRef}
+                  data-entrance
+                  className="relative select-none"
                 style={{
                   width: grid.cols * cell + (grid.cols - 1) * gap,
                   height: grid.rows * cell + (grid.rows - 1) * gap,
@@ -477,18 +499,27 @@ export default function Portfolio() {
                     <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 hover:bg-white/10" />
                   </button>
                 ))}
+                </div>
               </div>
             </div>
+            <div data-entrance className="mt-3 flex items-center justify-between text-[12px] leading-[1.75] text-[#111]/60">
+              <button
+                type="button"
+                onClick={shuffleTiles}
+                className="cursor-pointer underline-offset-2 transition hover:text-[#111] hover:underline focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1 rounded"
+              >
+                Shuffle
+              </button>
+              <span>Slide a tile to see its details. ↑</span>
+            </div>
           </div>
+        </div>
 
-          {/* Right: active tile content (tile in bottom-right slot) */}
-          <div data-entrance className="w-[420px]">
+        {/* Right half: left padding matches first half right */}
+        <div className="flex min-w-0 flex-1 flex-col border-l border-[#111]/10 py-10 pl-12 pr-12">
+          <div data-entrance className="min-h-0 flex-1 overflow-auto">
             <div ref={activePanelRef}>
-              {activeTile === null ? (
-                <div data-active-line className="text-[12px] leading-[1.75] text-[#111]/60">
-                  Slide a tile to the bottom-right to see its details.
-                </div>
-              ) : activeTile.isProfile ? (
+              {activeTile === null ? null : activeTile.isProfile ? (
                 <div className="space-y-6">
                   <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
                     <div className="pt-[2px]">
@@ -592,45 +623,26 @@ export default function Portfolio() {
               )}
             </div>
           </div>
-        </div>
 
-        {/* BIG WHITE SPACE */}
-        <div className="flex-1" />
-
-        {/* BOTTOM BAND */}
-        <div className="grid grid-cols-12 gap-12 items-end">
-          <aside className="col-span-4">
-            <div data-entrance className="text-[11px] text-[#111]/55">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/70">
-                  +
-                </span>
-                <span>23 01 2001</span>
-              </div>
-              <div className="mt-2">Amsterdam · Mexico · Remote</div>
-              <div className="mt-2">
-                +31 6 10 67 22 83 ·{" "}
-                <a
-                  className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                  href="mailto:ayukoene@gmail.com"
-                >
-                  ayukoene@gmail.com
-                </a>{" "}
-                · ayukoene.com
-              </div>
+          <aside data-entrance className="mt-auto pt-8 text-[11px] text-[#111]/55">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/70">
+                i
+              </span>
+              <span>Ayu Koene · 23 01 2001</span>
+            </div>
+            <div className="mt-2">Amsterdam · Mexico · Remote</div>
+            <div className="mt-2">
+              +31 6 10 67 22 83 ·{" "}
+              <a
+                className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                href="mailto:ayukoene@gmail.com"
+              >
+                ayukoene@gmail.com
+              </a>{" "}
+              · ayukoene.com
             </div>
           </aside>
-
-          <div className="col-span-4" />
-
-          <section className="col-span-4">
-            <div data-entrance className="text-[12px] text-[#111]/55">
-              <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[12px]">
-                ?
-              </span>
-              Slide tiles so the bottom-right shows who or what you want to read about.
-            </div>
-          </section>
         </div>
       </div>
     </div>
