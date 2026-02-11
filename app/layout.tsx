@@ -3,8 +3,8 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 
 export const metadata: Metadata = {
-  title: "Ayu Koene — Strategic designer",
-  description: "Strategic designer shaping product, systems and craft into clear direction.",
+  title: "Ayu Koene",
+  description: "Creator Designer Engineer",
 };
 
 export default function RootLayout({
