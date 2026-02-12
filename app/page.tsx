@@ -729,7 +729,7 @@ export default function Portfolio() {
                         <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
                           <div>Website refresh</div>
                           <div>23plusone happiness scan + research dashboard platform</div>
-                          <div>Credits: Sinyo Koene | Twin-brother · Software Engineer · Data Analyst</div>
+                          <div>Credits: Sinyo Koene | Software Engineer · Data Analyst</div>
                         </div>
                       </div>
                     </div>
