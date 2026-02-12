@@ -60,32 +60,34 @@ export default function ScrollReveal({
   className,
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [reduceMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  const [visible, setVisible] = useState(reduceMotion);
 
   useEffect(() => {
-    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setVisible(true);
-      return;
-    }
+    if (reduceMotion) return;
     const el = ref.current;
     if (!el) return;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
-          setTimeout(() => setVisible(true), delay);
+          timeoutId = setTimeout(() => setVisible(true), delay);
+          io.unobserve(entry.target);
         });
       },
       { threshold }
     );
     io.observe(el);
-    return () => io.disconnect();
+    return () => {
+      io.disconnect();
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [delay, threshold, reduceMotion]);
 
   const style = reduceMotion || visible

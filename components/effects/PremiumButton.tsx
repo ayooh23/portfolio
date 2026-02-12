@@ -20,6 +20,14 @@ const variantClass = {
   ghost: "bg-transparent text-neutral-50 border border-neutral-600 hover:border-neutral-400",
 };
 
+const effectClass = {
+  magnetic: "hover:-translate-y-0.5",
+  ripple: "overflow-hidden",
+  glow: "hover:shadow-[0_0_0_1px_rgba(255,255,255,0.3),0_0_18px_rgba(255,255,255,0.25)]",
+  morph: "hover:rounded-[12px]",
+  elastic: "hover:scale-[1.02]",
+};
+
 export default function PremiumButton({
   children,
   effect = "magnetic",
@@ -29,7 +37,7 @@ export default function PremiumButton({
   className,
 }: PremiumButtonProps) {
   const baseClass = "inline-flex items-center justify-center rounded-[8px] px-5 py-2.5 text-sm font-medium transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] active:scale-[0.98] active:translate-y-0.5";
-  const combined = `${baseClass} ${variantClass[variant]} ${className ?? ""}`;
+  const combined = `${baseClass} ${variantClass[variant]} ${effectClass[effect]} ${className ?? ""}`;
 
   if (href) {
     return (

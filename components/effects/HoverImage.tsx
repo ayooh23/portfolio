@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 
 type Effect = "zoom" | "lift" | "tilt" | "shine" | "blur";
 
@@ -20,8 +19,6 @@ export default function HoverImage({
   containerClassName,
   priority = false,
 }: HoverImageProps) {
-  const [hover, setHover] = useState(false);
-
   const imgClass =
     effect === "zoom"
       ? "transition-transform duration-700 ease-out hover:scale-110"
@@ -34,11 +31,7 @@ export default function HoverImage({
             : "transition-transform duration-700 ease-out hover:scale-105";
 
   return (
-    <div
-      className={`overflow-hidden ${containerClassName ?? ""}`}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-    >
+    <div className={`overflow-hidden ${containerClassName ?? ""}`}>
       <div className="relative">
         <Image
           src={src}

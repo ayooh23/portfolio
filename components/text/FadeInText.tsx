@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { m } from "framer-motion";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
@@ -28,10 +28,11 @@ export default function FadeInText({
   direction = "up",
   className,
 }: FadeInTextProps) {
-  const [reduceMotion, setReduceMotion] = useState(false);
-  useEffect(() => {
-    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
+  const [reduceMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
   const d = dirMap[direction];
 
   if (reduceMotion) {

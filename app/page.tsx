@@ -487,12 +487,16 @@ export default function Portfolio() {
   };
 
   return (
-    <div
+    <main
       ref={rootRef}
       className={`min-h-screen w-full overflow-x-hidden bg-white text-[#111]${
         isHorizontalLayout ? " h-screen w-screen overflow-hidden" : ""
       }`}
     >
+      <h1 className="sr-only">
+        Ayu Koene portfolio, strategic designer focused on innovation, service design, and
+        product design.
+      </h1>
       <div
         className={
           isHorizontalLayout
@@ -659,7 +663,17 @@ export default function Portfolio() {
                     <div>
                       <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">Education</div>
                       <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                        <div>MSc Digital Design · Amsterdam University of Applied Sciences</div>
+                        <div>
+                          <a
+                            href="https://www.masterdigitaldesign.com/alumni/ayu-koene"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                          >
+                            MSc Digital Design
+                          </a>{" "}
+                          · Amsterdam University of Applied Sciences
+                        </div>
                         <div>BSc Mechanical Engineering · University of Twente &amp; Vrije Universiteit Amsterdam</div>
                       </div>
                     </div>
@@ -877,6 +891,6 @@ export default function Portfolio() {
           </aside>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

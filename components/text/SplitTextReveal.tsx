@@ -23,12 +23,12 @@ export default function SplitTextReveal({
   className,
 }: SplitTextRevealProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [reduceMotion, setReduceMotion] = useState(false);
+  const [reduceMotion] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
   const splitRef = useRef<SplitType | null>(null);
-
-  useEffect(() => {
-    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
 
   useEffect(() => {
     if (reduceMotion || !containerRef.current) return;
