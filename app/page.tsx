@@ -602,7 +602,10 @@ export default function Portfolio() {
                 </div>
               </div>
             </div>
-            <div data-entrance className="mt-4 flex items-center justify-between gap-4 text-[11px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:text-[12px]">
+            <div
+              data-entrance
+              className="mt-4 flex flex-col items-start gap-2 text-[11px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:text-[12px]"
+            >
               <button
                 type="button"
                 onClick={shuffleTiles}
@@ -610,7 +613,7 @@ export default function Portfolio() {
               >
                 Shuffle
               </button>
-              <div className="text-right text-[#111]/55">
+              <div className="text-left text-[#111]/55 sm:text-right">
                 Want to add a new project to my display?{" "}
                 <a
                   href="mailto:ayukoene@gmail.com"
@@ -846,28 +849,30 @@ export default function Portfolio() {
                 : "mt-8 pt-0 text-[10px] text-[#111]/55"
             }
           >
-            <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex items-start gap-2">
               <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/70">
                 i
               </span>
-              <span>
-                Ayu Koene · 23 01 2001 · Amsterdam · Mexico · Remote · +31 6 10 67 22 83 ·{" "}
-                <a
-                  className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                  href="mailto:ayukoene@gmail.com"
-                >
-                  ayukoene@gmail.com
-                </a>{" "}
-                ·{" "}
-                <a
-                  className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                  href="https://nl.linkedin.com/in/ayu-koene-55b63718a"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Linkedin
-                </a>
-              </span>
+              <div className="min-w-0 flex-1">
+                <span className="block whitespace-normal break-words">
+                  Ayu Koene · 23 01 2001 · Amsterdam · Mexico · Remote · +31 6 10 67 22 83 ·{" "}
+                  <a
+                    className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                    href="mailto:ayukoene@gmail.com"
+                  >
+                    ayukoene@gmail.com
+                  </a>{" "}
+                  ·{" "}
+                  <a
+                    className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                    href="https://nl.linkedin.com/in/ayu-koene-55b63718a"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Linkedin
+                  </a>
+                </span>
+              </div>
             </div>
           </aside>
         </div>
