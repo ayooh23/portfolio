@@ -62,13 +62,26 @@ function getTileTouchAction(from: number, emptyIndices: number[], cols: number):
 
 export default function Portfolio() {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const loaderOverlayRef = useRef<HTMLDivElement | null>(null);
+  const loaderContentRef = useRef<HTMLDivElement | null>(null);
+  const loaderImageFrameRef = useRef<HTMLDivElement | null>(null);
+  const loaderCursorRef = useRef<HTMLSpanElement | null>(null);
+  const activeHintCursorRef = useRef<HTMLSpanElement | null>(null);
+  const loaderTypeCharsRef = useRef(0);
+  const loaderImageIndexRef = useRef(0);
+  const activeHintCharsRef = useRef(0);
+  const loaderTypeText = "Hello! How Ayu?";
+  const activeCellHintText = "Drag here to learn more";
+  const [isLoading, setIsLoading] = useState(true);
+  const [loaderTypeChars, setLoaderTypeChars] = useState(0);
+  const [loaderImageIndex, setLoaderImageIndex] = useState(0);
+  const [activeHintChars, setActiveHintChars] = useState(0);
 
   // puzzle refs
   const boardRef = useRef<HTMLDivElement | null>(null);
   const tileRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const activePanelRef = useRef<HTMLDivElement | null>(null);
   const prevActiveIdRef = useRef<string | null>(null);
-
 
   const projects: Project[] = useMemo(
     () => [
@@ -81,7 +94,7 @@ export default function Portfolio() {
         bullets: [
           "Designing tools and frameworks to support organisational transformation.",
           "Developing internal workflows and processes to help the studio work better, while managing client delivery and project timelines.",
-          "Creating BR-ND People's own brand across visual identity, materials, and digital touchpoints.",
+          "Contributing to BR-ND People's own brand across visual identity, materials, and digital touchpoints.",
         ],
         thumb: "/images/thumb_br-ndpeople.jpg",
         links: [{ label: "Open", href: "https://br-ndpeople.com" }],
@@ -166,6 +179,19 @@ export default function Portfolio() {
   );
 
   const tiles: Project[] = useMemo(() => [...projects, ayuTile], [projects, ayuTile]);
+  const loaderImageCount = 6;
+  const loadingGallery = useMemo(
+    () =>
+      [
+        "/images/ayu03.jpg",
+        "/images/ayu08.jpg",
+        "/images/ayu10.jpg",
+        "/images/ayu18.jpg",
+        "/images/ayu25.jpg",
+        "/images/ayu.jpg",
+      ].slice(0, loaderImageCount),
+    []
+  );
 
   // --- Layout knobs: 3x3 grid, 6 tiles + 3 empty
   const grid: GridSize = { cols: 3, rows: 3 };
@@ -187,6 +213,252 @@ export default function Portfolio() {
   const cell = boardContainerWidth / (grid.cols + (grid.cols - 1) * 0.1); // 3 cells + 2 gaps (gap = cell*0.1)
   const gap = cell * 0.1;
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    for (const src of loadingGallery) {
+      const img = new window.Image();
+      img.src = src;
+    }
+  }, [loadingGallery]);
+
+  useEffect(() => {
+    const overlayEl = loaderOverlayRef.current;
+    const contentEl = loaderContentRef.current;
+    const rootEl = rootRef.current;
+    if (!overlayEl || !contentEl || !rootEl) return;
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) {
+      const rafId = window.requestAnimationFrame(() => {
+        setLoaderTypeChars(loaderTypeText.length);
+        setLoaderImageIndex(loadingGallery.length - 1);
+        setIsLoading(false);
+      });
+      return () => window.cancelAnimationFrame(rafId);
+    }
+
+    const entranceEls = rootEl.querySelectorAll("[data-entrance]");
+    gsap.set(entranceEls, { opacity: 0, y: 6 });
+
+    const progressState = { value: 0 };
+    const typeState = { chars: 0 };
+    const totalImages = loadingGallery.length;
+    const progressDuration = 4.6;
+    const helloChars = "Hello!".length;
+    const holdDuration = 1.3;
+    loaderTypeCharsRef.current = 0;
+    loaderImageIndexRef.current = 0;
+
+    const syncTypeChars = () => {
+      const nextChars = Math.min(loaderTypeText.length, Math.round(typeState.chars));
+      if (nextChars !== loaderTypeCharsRef.current) {
+        loaderTypeCharsRef.current = nextChars;
+        setLoaderTypeChars(nextChars);
+      }
+    };
+
+    const tl = gsap.timeline();
+    tl.fromTo(
+      contentEl,
+      { autoAlpha: 0, x: -10 },
+      { autoAlpha: 1, x: 0, duration: 0.65, ease: "sine.out" }
+    );
+    tl.to(
+      typeState,
+      {
+        chars: 3,
+        duration: 0.32,
+        ease: "sine.out",
+        onUpdate: syncTypeChars,
+      },
+      0.14
+    );
+    tl.to(
+      typeState,
+      {
+        chars: helloChars,
+        duration: 0.52,
+        ease: "none",
+        onUpdate: syncTypeChars,
+      },
+      ">-0.02"
+    );
+    tl.to({}, { duration: 0.68 });
+    tl.to(typeState, {
+      chars: 8,
+      duration: 0.34,
+      ease: "sine.out",
+      onUpdate: syncTypeChars,
+    });
+    tl.to({}, { duration: 0.08 });
+    tl.to(typeState, {
+      chars: 7,
+      duration: 0.1,
+      ease: "none",
+      onUpdate: syncTypeChars,
+    });
+    tl.to(typeState, {
+      chars: loaderTypeText.length,
+      duration: 1.12,
+      ease: "none",
+      onUpdate: syncTypeChars,
+    });
+    tl.to(
+      progressState,
+      {
+        value: 100,
+        duration: progressDuration,
+        ease: "none",
+        onUpdate: () => {
+          const nextImageIndex = Math.min(
+            totalImages - 1,
+            Math.floor((progressState.value / 100) * totalImages)
+          );
+          if (nextImageIndex !== loaderImageIndexRef.current) {
+            loaderImageIndexRef.current = nextImageIndex;
+            setLoaderImageIndex(nextImageIndex);
+          }
+        },
+      },
+      0
+    );
+    tl.to({}, { duration: holdDuration });
+    tl.to(contentEl, { autoAlpha: 0, x: -6, duration: 0.45, ease: "sine.inOut" }, ">-0.02");
+    tl.to(
+      overlayEl,
+      {
+        autoAlpha: 0,
+        duration: 0.6,
+        ease: "sine.inOut",
+      },
+      "<0.04"
+    );
+    tl.to(
+      entranceEls,
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.82,
+        ease: "power2.out",
+        stagger: 0.03,
+      },
+      "<0.08"
+    );
+    tl.eventCallback("onComplete", () => {
+      setIsLoading(false);
+    });
+
+    return () => tl.kill();
+  }, [loaderTypeText, loadingGallery]);
+
+  useEffect(() => {
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) return;
+
+    const loaderCursor = loaderCursorRef.current;
+    const activeCursor = activeHintCursorRef.current;
+    const tweens: gsap.core.Tween[] = [];
+
+    if (loaderCursor) {
+      tweens.push(
+        gsap.to(loaderCursor, {
+          keyframes: [
+            { opacity: 1, duration: 0.2 },
+            { opacity: 0.24, duration: 0.14 },
+            { opacity: 0.92, duration: 0.26 },
+            { opacity: 0.35, duration: 0.1 },
+          ],
+          repeat: -1,
+          ease: "none",
+        })
+      );
+    }
+
+    if (activeCursor) {
+      tweens.push(
+        gsap.to(activeCursor, {
+          keyframes: [
+            { opacity: 1, duration: 0.24 },
+            { opacity: 0.2, duration: 0.12 },
+            { opacity: 1, duration: 0.32 },
+          ],
+          repeat: -1,
+          ease: "none",
+        })
+      );
+    }
+
+    return () => {
+      tweens.forEach((tween) => tween.kill());
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const frame = loaderImageFrameRef.current;
+    if (!frame) return;
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) return;
+
+    gsap.fromTo(
+      frame,
+      { autoAlpha: 0.82, scale: 1.012 },
+      { autoAlpha: 1, scale: 1, duration: 0.4, ease: "sine.out" }
+    );
+  }, [loaderImageIndex, isLoading]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) {
+      const rafId = window.requestAnimationFrame(() => {
+        setActiveHintChars(activeCellHintText.length);
+      });
+      return () => window.cancelAnimationFrame(rafId);
+    }
+
+    const typeState = { chars: 0 };
+    const tl = gsap.timeline({ delay: 0.26 });
+    const syncHintChars = () => {
+      const nextChars = Math.min(activeCellHintText.length, Math.floor(typeState.chars));
+      if (nextChars !== activeHintCharsRef.current) {
+        activeHintCharsRef.current = nextChars;
+        setActiveHintChars(nextChars);
+      }
+    };
+
+    tl.eventCallback("onStart", () => {
+      activeHintCharsRef.current = 0;
+      setActiveHintChars(0);
+    });
+    tl.to(typeState, {
+      chars: 6,
+      duration: 0.58,
+      ease: "none",
+      onUpdate: syncHintChars,
+    });
+    tl.to({}, { duration: 0.12 });
+    tl.to(typeState, {
+      chars: 14,
+      duration: 0.72,
+      ease: "none",
+      onUpdate: syncHintChars,
+    });
+    tl.to({}, { duration: 0.08 });
+    tl.to(typeState, {
+      chars: activeCellHintText.length,
+      duration: 1.05,
+      ease: "sine.out",
+      onUpdate: syncHintChars,
+      onComplete: () => setActiveHintChars(activeCellHintText.length),
+    });
+
+    return () => tl.kill();
+  }, [activeCellHintText, isLoading]);
+
   // puzzle state: tile -> cellIndex (6 tiles; 3 cells empty at 2,4,6)
   const [tilePos, setTilePos] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
@@ -194,6 +466,55 @@ export default function Portfolio() {
     tiles.forEach((t, i) => (initial[t.id] = order[i]));
     return initial;
   });
+  const profileTileIndex = tilePos[ayuTile.id];
+
+  useEffect(() => {
+    if (!isLoading) return;
+    const frame = loaderImageFrameRef.current;
+    const board = boardRef.current;
+    const content = loaderContentRef.current;
+    if (!frame || !board || !content || typeof profileTileIndex !== "number") return;
+
+    const syncFrameToProfileTile = () => {
+      const profileTileEl = tileRefs.current[ayuTile.id];
+      const tileRect = profileTileEl?.getBoundingClientRect();
+      const boardRect = board.getBoundingClientRect();
+      const fallback = cellXY(profileTileIndex, grid.cols, cell, gap);
+      const left = tileRect ? tileRect.left : boardRect.left + fallback.x;
+      const top = tileRect ? tileRect.top : boardRect.top + fallback.y;
+      const width = tileRect ? tileRect.width : cell;
+      const height = tileRect ? tileRect.height : cell;
+      const safePadding = 16;
+      const textOffset = Math.max(34, gap * 1.15);
+      const textWidth = content.getBoundingClientRect().width;
+      const rightSideLeft = left + width + textOffset;
+      const leftSideLeft = left - textWidth - textOffset;
+      const placeOnRight = rightSideLeft + textWidth <= window.innerWidth - safePadding;
+      const textLeft = placeOnRight
+        ? rightSideLeft
+        : Math.max(safePadding, leftSideLeft);
+      const textTop = top + height / 2;
+
+      gsap.set(frame, {
+        left,
+        top,
+        width,
+        height,
+      });
+      gsap.set(content, {
+        left: textLeft,
+        top: textTop,
+      });
+    };
+
+    const ticker = () => syncFrameToProfileTile();
+    syncFrameToProfileTile();
+    gsap.ticker.add(ticker);
+
+    return () => {
+      gsap.ticker.remove(ticker);
+    };
+  }, [ayuTile.id, cell, gap, grid.cols, isLoading, profileTileIndex]);
 
   // empty indices (3 of them)
   const currentEmptyIndices = useMemo(() => {
@@ -230,29 +551,6 @@ export default function Portfolio() {
       root.style.overflow = prev;
     };
   }, [splitLayoutBreakpoint]);
-
-  // initial entrance
-  useEffect(() => {
-    if (!rootRef.current) return;
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (reduce) return;
-
-    const ctx = gsap.context(() => {
-      gsap.set("[data-entrance]", { opacity: 0, y: 6 });
-      gsap.to("[data-entrance]", {
-        opacity: 1,
-        y: 0,
-        duration: 0.9,
-        ease: "power2.out",
-        stagger: 0.03,
-        delay: 0.06,
-      });
-    }, rootRef);
-
-    return () => ctx.revert();
-  }, []);
 
   // sync tile DOM positions with state (smooth)
   useEffect(() => {
@@ -493,6 +791,46 @@ export default function Portfolio() {
         isHorizontalLayout ? " h-screen w-screen overflow-hidden" : ""
       }`}
     >
+      {isLoading ? (
+        <div
+          ref={loaderOverlayRef}
+          className="fixed inset-0 z-[120] bg-white"
+          aria-live="polite"
+          aria-label="Loading portfolio"
+        >
+          <div
+            ref={loaderContentRef}
+            className="fixed z-[122] -translate-y-1/2 whitespace-nowrap text-left"
+            style={{ left: 0, top: 0, opacity: 0 }}
+          >
+            <div className="text-[clamp(18px,2.3vw,26px)] font-medium tracking-[0.02em] text-[#111]">
+              <span>{loaderTypeText.slice(0, loaderTypeChars)}</span>
+              <span
+                ref={loaderCursorRef}
+                aria-hidden="true"
+                className="ml-1 inline-block w-[0.75ch]"
+              >
+                _
+              </span>
+            </div>
+          </div>
+          <div
+            ref={loaderImageFrameRef}
+            className="fixed z-[121] overflow-hidden rounded-[10px] bg-[#f3f3f3]"
+            style={{ width: cell, height: cell, opacity: 0 }}
+          >
+            <Image
+              key={loadingGallery[loaderImageIndex]}
+              src={loadingGallery[loaderImageIndex]}
+              alt={`Loading gallery image ${loaderImageIndex + 1}`}
+              fill
+              sizes={`${Math.max(120, Math.round(cell))}px`}
+              className="object-cover"
+              priority
+            />
+          </div>
+        </div>
+      ) : null}
       <h1 className="sr-only">
         Ayu Koene portfolio, strategic designer focused on innovation, service design, and
         product design.
@@ -562,8 +900,19 @@ export default function Portfolio() {
                     }}
                   >
                     {idx === activeCellIndex ? (
-                      <div className="flex h-full w-full items-center justify-center px-3 text-center text-[16px] font-semibold leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]">
-                        Drag here to learn more
+                      <div
+                        className="flex h-full w-full items-center justify-center px-3 text-center text-[16px] font-semibold leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]"
+                      >
+                        <span>{activeCellHintText.slice(0, activeHintChars)}</span>
+                        {activeHintChars < activeCellHintText.length ? (
+                          <span
+                            ref={activeHintCursorRef}
+                            aria-hidden="true"
+                            className="ml-1 inline-block w-[0.75ch]"
+                          >
+                            _
+                          </span>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
@@ -850,7 +1199,6 @@ export default function Portfolio() {
                                 className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
                               >
                                 {link.label}
-                                {link.href.startsWith("http") ? " ↗" : ""}
                               </a>
                             </div>
                           ))}
