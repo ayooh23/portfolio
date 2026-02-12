@@ -77,11 +77,11 @@ export default function Portfolio() {
         title: "BR-ND People",
         roleLine: "Design & Innovation Lead · 2021–Present",
         description:
-          "'Turning \"we should change\" into \"here's how we change.\"' Strategy consultancy working on culture, brand and transformation, where I currently work.",
+          "Creative change agency working on culture, strategy and expression. | Currently working here as design & innovation lead and project manager—shaping internal workflows and tools while leading external client projects across healthcare, public sector and creative industries.",
         bullets: [
-          "Led workshops to help teams move from vague ambitions to concrete roadmaps, the messy transdisciplinary kind where everyone starts speaking different languages.",
-          "Designed frameworks that translated abstract strategy into actual programs people could execute.",
-          "Built service concepts combining systems thinking with compelling narratives, because the best strategies are ones that stick.",
+          "Designing tools and frameworks to support organisational transformation.",
+          "Developing internal workflows and processes to help the studio work better, while managing client delivery and project timelines.",
+          "Creating BR-ND People's own brand across visual identity, materials, and digital touchpoints.",
         ],
         thumb: "/images/thumb_br-ndpeople.jpg",
         links: [{ label: "Open", href: "https://br-ndpeople.com" }],
@@ -91,7 +91,7 @@ export default function Portfolio() {
         title: "OLVG · D&O (Dokter & Opvang)",
         roleLine: "Service Design Lead · 2024–2025",
         description:
-          "\"Real care doesn't stop at the exit door.\" Healthcare innovation supporting vulnerable patients across hospitals, NGOs and social services.",
+          "Because real care doesn't stop at the exit door. | Healthcare innovation supporting vulnerable patients across hospitals, NGOs and social services.",
         bullets: [
           "Designed service flows and digital platforms connecting hospitals, NGOs and public services, each with different constraints and languages.",
           "Rapidly prototyped and validated tools with frontline staff during actual shifts, iterating based on real use.",
@@ -109,7 +109,7 @@ export default function Portfolio() {
         title: "Stroll",
         roleLine: "Founder & Venture Experiment Lead · 2024–2025",
         description:
-          "\"What if navigation felt like intuition?\" Early-stage product exploring new grounds in AI-powered navigation, no screens required.",
+          "What if navigation felt like intuition? | Early-stage product exploring new grounds in AI-powered navigation, no screens required.",
         bullets: [
           "Framed product strategy and experimentation roadmap, from idea to testable prototype.",
           "Designed haptic interaction patterns that guide without directing, working at the intersection of AI, embodied interaction and spatial computing.",
@@ -123,7 +123,7 @@ export default function Portfolio() {
         title: "ASML · DMS Evaluation",
         roleLine: "Innovation & Systems Design (Thesis) · 2023–2024",
         description:
-          "\"When engineers play games, researchers learn how they think.\" Research project exploring decision-making in deep-tech semiconductor manufacturing through simulation.",
+          "When engineers play games, researchers learn how they think. | Research project exploring decision-making in deep-tech semiconductor manufacturing through simulation.",
         bullets: [
           "Designed an abstract simulation workshop where systems engineers played through scenarios while researchers observed their thinking patterns.",
           "Built the game mechanics and facilitation framework that made invisible decision-making visible and analyzable.",
@@ -137,7 +137,7 @@ export default function Portfolio() {
         title: "Tiny Troubles",
         roleLine: "Co-founder · 2019–2021",
         description:
-          "\"Digital art funding physical change.\" Early-stage platform using Web3 to bridge digital creativity and real-world social impact.",
+          "Planet Earth is worth causing trouble for. | Early-stage platform using Web3 to bridge digital creativity and real-world social impact.",
         bullets: [
           "Co-led product strategy and positioning for a platform exploring new grounds, testing how digital art could fund tangible good through emerging tech.",
           "Designed the experience and brand identity, working at the intersection of Web3, community and social impact.",
@@ -156,7 +156,7 @@ export default function Portfolio() {
       title: "Ayu Koene",
       roleLine: "Strategic designer",
       description:
-        "Hello! My name is Ayu. I'm a strategic designer with a background in mechanical engineering, digital design, and brand strategy. I'm experienced in building concepts from early vision to tangible prototypes by working at the intersection of design, technology and culture.",
+        "Hello! My name is Ayu. I'm a strategic designer with a background in mechanical engineering, digital design, and brand strategy. I'm experienced in building concepts from early vision to tangible prototypes. I work at the intersection of design, technology, and culture.",
       bullets: [],
       thumb: "/images/ayu.jpg",
       links: [],
@@ -684,7 +684,7 @@ export default function Portfolio() {
                     </div>
                     <div>
                       <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">Latest explorations</div>
-                      <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">Cursor</div>
+                      <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">Vibe coding</div>
                     </div>
                   </div>
                 </div>
@@ -728,8 +728,8 @@ export default function Portfolio() {
                         <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">Recent builds</div>
                         <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
                           <div>Website refresh</div>
-                          <div>23plusone happiness scan and research dashboard platform</div>
-                          <div>Credits: Sinyo Koene (Twin-brother · Software Engineer · Data Analyst)</div>
+                          <div>23plusone happiness scan + research dashboard platform</div>
+                          <div>Credits: Sinyo Koene | Twin-brother · Software Engineer · Data Analyst</div>
                         </div>
                       </div>
                     </div>
