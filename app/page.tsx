@@ -855,7 +855,7 @@ export default function Portfolio() {
               </span>
               <div className="min-w-0 flex-1">
                 <span className="block whitespace-normal break-words">
-                  Ayu Koene · 23 01 2001 · Amsterdam · Mexico · Remote · +31 6 10 67 22 83 ·{" "}
+                  Ayu Koene · 23 01 2001 · Amsterdam · Mexico · Remote · +31610672283 ·{" "}
                   <a
                     className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
                     href="mailto:ayukoene@gmail.com"
