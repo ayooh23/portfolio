@@ -608,12 +608,12 @@ export default function Portfolio() {
             </div>
             <div
               data-entrance
-              className="mt-4 flex flex-col items-start gap-2 text-[11px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:text-[12px]"
+              className="mt-4 grid w-full grid-cols-1 gap-2 text-[11px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:min-h-[36px] sm:grid-cols-[auto_1fr] sm:items-center sm:gap-4 sm:text-[12px]"
             >
               <button
                 type="button"
                 onClick={shuffleTiles}
-                className="cursor-pointer underline-offset-2 transition hover:text-[#111] hover:underline focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1 rounded"
+                className="inline-flex h-9 items-center self-start rounded px-0 text-left cursor-pointer underline-offset-2 transition hover:text-[#111] hover:underline focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1"
               >
                 Shuffle
               </button>
