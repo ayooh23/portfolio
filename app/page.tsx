@@ -15,7 +15,7 @@ import {
 
 function NumberBadge({ n }: { n: number }) {
   return (
-    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[12px] font-medium text-[#111] sm:text-[11px]">
+    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[14px] font-medium text-[#111] sm:text-[11px]">
       {n}
     </div>
   );
@@ -59,15 +59,15 @@ function getTileTouchAction(from: number, emptyIndices: number[], cols: number):
 }
 
 const detailRowClass = "grid grid-cols-[24px_1fr] gap-3";
-const detailTitleClass = "text-[13px] font-medium text-[#111]/85 sm:text-[13px]";
+const detailTitleClass = "text-[15px] font-medium text-[#111]/85 sm:text-[13px]";
 const detailBodyClass =
-  "mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]";
+  "mt-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]";
 const detailLinkClass =
   "underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]";
 
 function PlusBadge() {
   return (
-    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[13px] font-medium text-[#111]/70 sm:text-[13px]">
+    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[14px] font-medium text-[#111]/70 sm:text-[13px]">
       +
     </div>
   );
@@ -825,10 +825,10 @@ export default function Portfolio() {
         >
           <div
             ref={loaderContentRef}
-            className="fixed z-[122] -translate-y-1/2 whitespace-nowrap text-left"
+            className="fixed z-[122] -translate-y-1/2 w-[calc(100vw-32px)] break-words text-left whitespace-normal [overflow-wrap:anywhere] md:w-auto md:break-normal md:whitespace-nowrap md:[overflow-wrap:normal]"
             style={{ left: 0, top: 0, opacity: 0 }}
           >
-            <div className="text-[clamp(18px,2.3vw,26px)] font-medium tracking-[0.02em] text-[#111]">
+            <div className="text-[clamp(20px,2.3vw,26px)] font-medium tracking-[0.02em] text-[#111]">
               <span>{loaderTypeText.slice(0, loaderTypeChars)}</span>
               {loaderTypeChars < loaderTypeText.length ? (
                 <span
@@ -888,7 +888,7 @@ export default function Portfolio() {
               : "flex min-w-0 flex-col px-5 pb-6 pt-8"
           }
         >
-          <div data-entrance className="flex items-center gap-3 text-[13px] font-medium text-[#111]/80 sm:text-[12px]">
+          <div data-entrance className="flex items-center gap-3 text-[15px] font-medium text-[#111]/80 sm:text-[12px]">
             <NumberBadge n={0} />
             <span>Currently on display</span>
           </div>
@@ -939,7 +939,7 @@ export default function Portfolio() {
                     >
                       {idx === activeCellIndex ? (
                         <div
-                          className="flex h-full w-full items-center justify-center px-3 text-center text-[16px] font-medium leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]"
+                          className="flex h-full w-full items-center justify-center px-3 text-center text-[18px] font-medium leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]"
                         >
                           <span>{activeCellHintText.slice(0, activeHintChars)}</span>
                           {activeHintChars < activeCellHintText.length ? (
@@ -997,12 +997,12 @@ export default function Portfolio() {
             </div>
             <div
               data-entrance
-              className="mt-4 grid w-full grid-cols-1 gap-2 text-[12px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:min-h-[36px] sm:grid-cols-[auto_auto_1fr] sm:items-center sm:gap-4 sm:text-[12px]"
+              className="mt-4 grid w-full grid-cols-1 gap-2 text-[14px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:min-h-[36px] sm:grid-cols-[auto_auto_1fr] sm:items-center sm:gap-4 sm:text-[12px]"
             >
               <button
                 type="button"
                 onClick={shuffleTiles}
-                className="group inline-flex h-9 items-center gap-2 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1"
+                className="group inline-flex h-9 items-center gap-3 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1"
               >
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/60">
                   !
@@ -1081,7 +1081,7 @@ export default function Portfolio() {
                   </DetailSection>
                   {activeTile.bullets.length > 0 ? (
                     <DetailSection marker={<NumberBadge n={2} />} title="Key points">
-                      <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                      <div className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
                         {activeTile.bullets.map((b) => (
                           <div key={b}>{b}</div>
                         ))}
@@ -1113,7 +1113,7 @@ export default function Portfolio() {
                   ) : null}
                   {activeTile.id === "stroll" ? (
                     <DetailSection marker={<PlusBadge />} title="Credits">
-                      <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                      <div className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
                         <div>
                           Mehmet Bostanci ·{" "}
                           <a
@@ -1141,7 +1141,7 @@ export default function Portfolio() {
                   ) : null}
                   {activeTile.id === "tiny" ? (
                     <DetailSection marker={<PlusBadge />} title="Credits">
-                      <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                      <div className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
                         <div>Stefan David von Franquemont · 3D Artist</div>
                         <div>Sinyo Koene · Software Engineer</div>
                         <div>Luz David von Franquemont · Storytelling</div>
@@ -1150,7 +1150,7 @@ export default function Portfolio() {
                   ) : null}
                   {activeTile.links && activeTile.links.length > 0 ? (
                     <DetailSection marker={<PlusBadge />} title="More">
-                      <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                      <div className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
                         {activeTile.links.map((link) => (
                           <div key={`${activeTile.id}-${link.label}-${link.href}`}>
                             <a
@@ -1175,11 +1175,11 @@ export default function Portfolio() {
             data-entrance
             className={
               isHorizontalLayout
-                ? "mt-auto pt-8 text-[12px] text-[#111]/55 sm:text-[12px]"
-                : "mt-8 pt-0 text-[12px] text-[#111]/55 sm:text-[12px]"
+                ? "mt-auto pt-8 text-[14px] text-[#111]/55 sm:text-[12px]"
+                : "mt-8 pt-0 text-[14px] text-[#111]/55 sm:text-[12px]"
             }
           >
-            <div className="flex items-start gap-2">
+            <div className="flex items-start gap-3">
               <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/70">
                 i
               </span>
