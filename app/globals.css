@@ -1,50 +1,12 @@
 @import "tailwindcss";
 
-@font-face {
-    font-family: bbSans;
-    src: url(/_next/static/media/885334101185e0fd-s.p.woff2) format("woff2");
-    font-display: swap;
-}
-
-@font-face {
-    font-family: bbSans Fallback;
-    src: local("Arial");
-    ascent-override:96.18%;descent-override:19.38%;line-gap-override:0.00%;size-adjust:103.82%}
-
-.__className_3e085d {
-    font-family: bbSans, bbSans Fallback
-}
-
-.__variable_3e085d {
-    --font-bbsans: "bbSans", "bbSans Fallback"
-}
-
-@font-face {
-    font-family: jetBrainsMono;
-    src: url(/_next/static/media/2eac1da69b40c607-s.p.woff2) format("woff2");
-    font-display: swap;
-}
-
-@font-face {
-    font-family: jetBrainsMono Fallback;
-    src: local("Arial");
-    ascent-override:74.53%;descent-override:18.25%;line-gap-override:0.00%;size-adjust:131.49%}
-
-.__className_06a85b {
-    font-family: jetBrainsMono, jetBrainsMono Fallback
-}
-
-.__variable_06a85b {
-    --font-jetbrainsmono: "jetBrainsMono", "jetBrainsMono Fallback"
-}
-
 /*! tailwindcss v4.0.12 | MIT License | https://tailwindcss.com */
 @layer theme {
     :host, :root {
-        --font-bbsans: "bbSans", "bbSans Fallback";
-        --font-jetbrainsmono: "jetBrainsMono", "jetBrainsMono Fallback";
+        --font-bbsans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+        --font-jetbrainsmono: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
         --font-sans: var(--font-bbsans);
-        --font-mono: var(--font-jetbrainsmono);
+        --font-mono: var(--font-bbsans);
         --color-gray-200: #fafafa;
         --color-gray-400: #ededed;
         --color-gray-450: #9a9a9a;
