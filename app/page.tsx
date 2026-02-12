@@ -504,14 +504,9 @@ export default function Portfolio() {
       const height = tileRect ? tileRect.height : cell;
       const safePadding = 16;
       const textOffset = Math.max(34, gap * 1.15);
-      const textWidth = content.getBoundingClientRect().width;
       const rightSideLeft = left + width + textOffset;
-      const leftSideLeft = left - textWidth - textOffset;
-      const placeOnRight = rightSideLeft + textWidth <= window.innerWidth - safePadding;
-      const textLeft = placeOnRight
-        ? rightSideLeft
-        : Math.max(safePadding, leftSideLeft);
       const textTop = top + height / 2;
+      const isMobileLoader = window.innerWidth < splitLayoutBreakpoint;
 
       gsap.set(frame, {
         left,
@@ -519,6 +514,35 @@ export default function Portfolio() {
         width,
         height,
       });
+
+      if (isMobileLoader) {
+        const viewportWidth = window.innerWidth;
+        const preferredTextWidth = Math.min(240, viewportWidth - safePadding * 2);
+        const availableRight = viewportWidth - safePadding - rightSideLeft;
+        const availableLeft = left - safePadding - textOffset;
+        const placeOnRight = availableRight >= availableLeft;
+        const availableSpace = Math.max(0, placeOnRight ? availableRight : availableLeft);
+        const mobileTextWidth = Math.min(preferredTextWidth, availableSpace);
+        const textLeft = placeOnRight
+          ? rightSideLeft
+          : Math.max(safePadding, left - textOffset - mobileTextWidth);
+
+        gsap.set(content, {
+          left: textLeft,
+          top: textTop,
+          width: mobileTextWidth,
+        });
+        return;
+      }
+
+      gsap.set(content, { width: "auto" });
+      const textWidth = content.getBoundingClientRect().width;
+      const leftSideLeft = left - textWidth - textOffset;
+      const placeOnRight = rightSideLeft + textWidth <= window.innerWidth - safePadding;
+      const textLeft = placeOnRight
+        ? rightSideLeft
+        : Math.max(safePadding, leftSideLeft);
+
       gsap.set(content, {
         left: textLeft,
         top: textTop,
@@ -532,7 +556,7 @@ export default function Portfolio() {
     return () => {
       gsap.ticker.remove(ticker);
     };
-  }, [ayuTile.id, cell, gap, grid.cols, isLoading, profileTileIndex]);
+  }, [ayuTile.id, cell, gap, grid.cols, isLoading, profileTileIndex, splitLayoutBreakpoint]);
 
   // empty indices (3 of them)
   const currentEmptyIndices = useMemo(() => {
@@ -825,7 +849,7 @@ export default function Portfolio() {
         >
           <div
             ref={loaderContentRef}
-            className="fixed z-[122] -translate-y-1/2 w-[calc(100vw-32px)] break-words text-left whitespace-normal [overflow-wrap:anywhere] md:w-auto md:break-normal md:whitespace-nowrap md:[overflow-wrap:normal]"
+            className="fixed z-[122] -translate-y-1/2 break-words text-left whitespace-normal [overflow-wrap:anywhere] md:break-normal md:whitespace-nowrap md:[overflow-wrap:normal]"
             style={{ left: 0, top: 0, opacity: 0 }}
           >
             <div className="text-[clamp(20px,2.3vw,26px)] font-medium tracking-[0.02em] text-[#111]">
