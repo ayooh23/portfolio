@@ -24,6 +24,7 @@ function NumberBadge({ n }: { n: number }) {
 }
 
 type GridSize = { cols: number; rows: number };
+type TileTouchAction = "auto" | "none" | "pan-x" | "pan-y";
 
 // --- helpers
 function isAdjacent(a: number, b: number, cols: number) {
@@ -39,6 +40,24 @@ function cellXY(index: number, cols: number, cell: number, gap: number) {
   const x = (index % cols) * (cell + gap);
   const y = Math.floor(index / cols) * (cell + gap);
   return { x, y };
+}
+
+function getTileTouchAction(from: number, emptyIndices: number[], cols: number): TileTouchAction {
+  let canMoveX = false;
+  let canMoveY = false;
+
+  for (const emptyIdx of emptyIndices) {
+    if (!isAdjacent(from, emptyIdx, cols)) continue;
+    if (Math.floor(emptyIdx / cols) === Math.floor(from / cols)) {
+      canMoveX = true;
+    } else {
+      canMoveY = true;
+    }
+  }
+
+  if (!canMoveX && !canMoveY) return "auto";
+  if (canMoveX && canMoveY) return "none";
+  return canMoveX ? "pan-y" : "pan-x";
 }
 
 export default function Portfolio() {
@@ -541,7 +560,9 @@ export default function Portfolio() {
 
                 {/* Tiles */}
                 {tiles.map((tile) => {
-                  const isActive = tilePos[tile.id] === activeCellIndex;
+                  const from = tilePos[tile.id];
+                  const isActive = from === activeCellIndex;
+                  const touchAction = getTileTouchAction(from, currentEmptyIndices, grid.cols);
                   return (
                     <button
                       key={tile.id}
@@ -558,7 +579,7 @@ export default function Portfolio() {
                         "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
                         "transition-opacity duration-200",
                       ].join(" ")}
-                      style={{ width: cell, height: cell }}
+                      style={{ width: cell, height: cell, touchAction }}
                       aria-label={`Tile: ${tile.title}`}
                     >
                       <Image
