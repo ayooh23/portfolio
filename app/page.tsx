@@ -551,7 +551,7 @@ export default function Portfolio() {
                     key={`empty-${idx}`}
                     className={`absolute rounded-[10px] ${
                       idx === activeCellIndex
-                        ? "border-2 border-[#ececec]"
+                        ? "border-[2.5px] border-[#ececec]"
                         : "bg-[#f3f3f3]"
                     }`}
                     style={{
@@ -877,7 +877,7 @@ export default function Portfolio() {
               </span>
               <div className="min-w-0 flex-1">
                 <span className="block whitespace-normal break-words">
-                  Ayu Koene · 23 01 2001 · Amsterdam · Mexico · Remote · +31610672283 ·{" "}
+                  Ayu Koene · Amsterdam · Mexico · Remote · +31610672283 ·{" "}
                   <a
                     className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
                     href="mailto:ayukoene@gmail.com"
