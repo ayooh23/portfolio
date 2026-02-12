@@ -11,7 +11,7 @@ type Project = {
   description: string;
   bullets: string[];
   thumb: string;
-  link: string;
+  links?: { label: string; href: string }[];
   isProfile?: boolean;
 };
 
@@ -75,71 +75,76 @@ export default function Portfolio() {
       {
         id: "brnd",
         title: "BR-ND People",
-        roleLine: "Design & Innovation Lead · 2021–2025",
+        roleLine: "Design & Innovation Lead · 2021–Present",
         description:
-          "Creative change agency working across brand, culture, strategy, and expression.",
+          "'Turning \"we should change\" into \"here's how we change.\"' Strategy consultancy working on culture, brand and transformation, where I currently work.",
         bullets: [
-          "Designed digital and physical tools to support organisational change.",
-          "Developed new service concepts and frameworks with multidisciplinary teams.",
-          "Led workshops, concepting sessions and prototype development.",
+          "Led workshops to help teams move from vague ambitions to concrete roadmaps, the messy transdisciplinary kind where everyone starts speaking different languages.",
+          "Designed frameworks that translated abstract strategy into actual programs people could execute.",
+          "Built service concepts combining systems thinking with compelling narratives, because the best strategies are ones that stick.",
         ],
         thumb: "/images/thumb_br-ndpeople.jpg",
-        link: "#brnd",
+        links: [{ label: "Open", href: "https://br-ndpeople.com" }],
       },
       {
         id: "do",
         title: "OLVG · D&O (Dokter & Opvang)",
-        roleLine: "Service & Product Designer · 2024–2025",
+        roleLine: "Service Design Lead · 2024–2025",
         description:
-          "Digital platform and physical referral system for emergency departments supporting vulnerable patients.",
+          "\"Real care doesn't stop at the exit door.\" Healthcare innovation supporting vulnerable patients across hospitals, NGOs and social services.",
         bullets: [
-          "Designed service flows, interfaces and physical artefacts across healthcare stakeholders.",
-          "Prototyped and tested tools with frontline staff.",
-          "Translated complex care pathways into clear, usable systems.",
+          "Designed service flows and digital platforms connecting hospitals, NGOs and public services, each with different constraints and languages.",
+          "Rapidly prototyped and validated tools with frontline staff during actual shifts, iterating based on real use.",
+          "Created systems where accessibility and operational reality both win; nobody should have to choose between what's right and what's possible.",
         ],
         thumb: "/images/thumb_do.jpg",
-        link: "#do",
+        links: [
+          { label: "Read article", href: "#do-article" },
+          { label: "Watch Trailer", href: "#do-trailer" },
+          { label: "Download Research Paper", href: "#do-research-paper" },
+        ],
       },
       {
         id: "stroll",
         title: "Stroll",
-        roleLine: "Founder & Product Strategist · 2024–2025",
+        roleLine: "Founder & Venture Experiment Lead · 2024–2025",
         description:
-          "AI-powered, screen-free navigation concept exploring new ways of moving through urban space.",
+          "\"What if navigation felt like intuition?\" Early-stage product exploring new grounds in AI-powered navigation, no screens required.",
         bullets: [
-          "Designed haptic interaction logic and physical-digital product experience.",
-          "Built and tested prototypes to explore user behaviour and desirability.",
-          "Developed product vision, narrative and concept positioning.",
+          "Framed product strategy and experimentation roadmap, from idea to testable prototype.",
+          "Designed haptic interaction patterns that guide without directing, working at the intersection of AI, embodied interaction and spatial computing.",
+          "Ran rapid validation cycles to figure out what works, learning by building and testing rather than theorizing.",
         ],
         thumb: "/images/thumb_stroll.jpg",
-        link: "/stroll",
+        links: [{ label: "Open", href: "/stroll" }],
       },
       {
         id: "dms",
         title: "ASML · DMS Evaluation",
         roleLine: "Innovation & Systems Design (Thesis) · 2023–2024",
         description:
-          "Research and design project within a deep-tech semiconductor context.",
+          "\"When engineers play games, researchers learn how they think.\" Research project exploring decision-making in deep-tech semiconductor manufacturing through simulation.",
         bullets: [
-          "Developed simulation-driven design tools supporting systems engineering workflows.",
-          "Translated complex technical challenges into usable design frameworks.",
-          "Validated concepts with engineers and researchers.",
+          "Designed an abstract simulation workshop where systems engineers played through scenarios while researchers observed their thinking patterns.",
+          "Built the game mechanics and facilitation framework that made invisible decision-making visible and analyzable.",
+          "Translated findings into insights about how technical teams navigate uncertainty when stakes are high and information is incomplete, working between design research and engineering rigor.",
         ],
         thumb: "/images/thumb_dms.png",
-        link: "#dms",
+        links: [{ label: "Download Research Paper", href: "#dms" }],
       },
       {
         id: "tiny",
         title: "Tiny Troubles",
-        roleLine: "Co-founder & Product Designer · 2019–2021",
+        roleLine: "Co-founder · 2019–2021",
         description:
-          "Digital art and storytelling platform exploring emotional expression through interactive design.",
+          "\"Digital art funding physical change.\" Early-stage platform using Web3 to bridge digital creativity and real-world social impact.",
         bullets: [
-          "Designed digital experiences and brand system for a community-driven platform.",
-          "Led concept development and creative direction across multiple releases.",
+          "Co-led product strategy and positioning for a platform exploring new grounds, testing how digital art could fund tangible good through emerging tech.",
+          "Designed the experience and brand identity, working at the intersection of Web3, community and social impact.",
+          "Learned what it actually takes to build and ship a product from zero, including legal structures, finances, and keeping a small team aligned when everyone is doing different things.",
         ],
         thumb: "/images/thumb_tiny.jpeg",
-        link: "#tiny",
+        links: [{ label: "Open", href: "#tiny" }],
       },
     ],
     []
@@ -154,7 +159,7 @@ export default function Portfolio() {
         "Hello! My name is Ayu. I'm a strategic designer with a background in mechanical engineering, digital design, and brand strategy. I'm experienced in building concepts from early vision to tangible prototypes by working at the intersection of design, technology and culture.",
       bullets: [],
       thumb: "/images/ayu.jpg",
-      link: "",
+      links: [],
       isProfile: true,
     }),
     []
@@ -597,7 +602,7 @@ export default function Portfolio() {
                 </div>
               </div>
             </div>
-            <div data-entrance className="mt-4 flex items-center justify-between text-[11px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:text-[12px]">
+            <div data-entrance className="mt-4 flex items-center justify-between gap-4 text-[11px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:text-[12px]">
               <button
                 type="button"
                 onClick={shuffleTiles}
@@ -605,6 +610,15 @@ export default function Portfolio() {
               >
                 Shuffle
               </button>
+              <div className="text-right text-[#111]/55">
+                Want to add a new project to my display?{" "}
+                <a
+                  href="mailto:ayukoene@gmail.com"
+                  className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                >
+                  Send me a message.
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -667,7 +681,7 @@ export default function Portfolio() {
                     </div>
                     <div>
                       <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">Latest explorations</div>
-                      <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">Cursor [12-02-2026]</div>
+                      <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">Cursor</div>
                     </div>
                   </div>
                 </div>
@@ -700,7 +714,99 @@ export default function Portfolio() {
                       </div>
                     </div>
                   ) : null}
-                  {activeTile.link ? (
+                  {activeTile.id === "brnd" ? (
+                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
+                      <div className="pt-[2px]">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[11px] font-medium text-[#111]/70 sm:text-[12px]">
+                          +
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">Recent builds</div>
+                        <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                          <div>Website refresh</div>
+                          <div>23plusone happiness scan and research dashboard platform</div>
+                          <div>Credits: Sinyo Koene (Twin-brother · Software Engineer · Data Analyst)</div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                  {activeTile.id === "do" ? (
+                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
+                      <div className="pt-[2px]">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[11px] font-medium text-[#111]/70 sm:text-[12px]">
+                          +
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">Credits</div>
+                        <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                          <a
+                            href="https://www.masterdigitaldesign.com/alumni/victor-jimoh-2"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                          >
+                            Victor Jimoh
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                  {activeTile.id === "stroll" ? (
+                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
+                      <div className="pt-[2px]">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[11px] font-medium text-[#111]/70 sm:text-[12px]">
+                          +
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">Credits</div>
+                        <div className="mt-1 space-y-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                          <div>
+                            Mehmet Bostanci ·{" "}
+                            <a
+                              href="https://thingscon.org"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                            >
+                              TH/NGScon
+                            </a>
+                          </div>
+                          <div>
+                            Dani Klein ·{" "}
+                            <a
+                              href="https://ddw.nl"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                            >
+                              Dutch Design Week
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                  {activeTile.id === "tiny" ? (
+                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
+                      <div className="pt-[2px]">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[11px] font-medium text-[#111]/70 sm:text-[12px]">
+                          +
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">Credits</div>
+                        <div className="mt-1 space-y-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                          <div>Stefan David von Franquemont · 3D Artist</div>
+                          <div>Sinyo Koene · Software Engineer</div>
+                          <div>Luz David von Franquemont · Storytelling</div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                  {activeTile.links && activeTile.links.length > 0 ? (
                     <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
                       <div className="pt-[2px]">
                         <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[11px] font-medium text-[#111]/70 sm:text-[12px]">
@@ -709,15 +815,20 @@ export default function Portfolio() {
                       </div>
                       <div>
                         <div className="text-[11px] font-medium text-[#111]/85 sm:text-[12px]">More</div>
-                        <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                          <a
-                            href={activeTile.link}
-                            target={activeTile.link.startsWith("http") ? "_blank" : undefined}
-                            rel={activeTile.link.startsWith("http") ? "noreferrer" : undefined}
-                            className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                          >
-                            Open ↗
-                          </a>
+                        <div className="mt-1 space-y-1 text-[11px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                          {activeTile.links.map((link) => (
+                            <div key={`${activeTile.id}-${link.label}-${link.href}`}>
+                              <a
+                                href={link.href}
+                                target={link.href.startsWith("http") ? "_blank" : undefined}
+                                rel={link.href.startsWith("http") ? "noreferrer" : undefined}
+                                className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                              >
+                                {link.label}
+                                {link.href.startsWith("http") ? " ↗" : ""}
+                              </a>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -735,22 +846,28 @@ export default function Portfolio() {
                 : "mt-8 pt-0 text-[10px] text-[#111]/55"
             }
           >
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/70">
+            <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/70">
                 i
               </span>
-              <span>Ayu Koene · 23 01 2001</span>
-            </div>
-            <div className="mt-2">Amsterdam · Mexico · Remote</div>
-            <div className="mt-2">
-              +31 6 10 67 22 83 ·{" "}
-              <a
-                className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                href="mailto:ayukoene@gmail.com"
-              >
-                ayukoene@gmail.com
-              </a>{" "}
-              · ayukoene.com
+              <span>
+                Ayu Koene · 23 01 2001 · Amsterdam · Mexico · Remote · +31 6 10 67 22 83 ·{" "}
+                <a
+                  className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                  href="mailto:ayukoene@gmail.com"
+                >
+                  ayukoene@gmail.com
+                </a>{" "}
+                ·{" "}
+                <a
+                  className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                  href="https://nl.linkedin.com/in/ayu-koene-55b63718a"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Linkedin
+                </a>
+              </span>
             </div>
           </aside>
         </div>
