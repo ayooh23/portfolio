@@ -1064,9 +1064,7 @@ export default function Portfolio() {
                   </DetailSection>
                   <DetailSection marker={<NumberBadge n={3} />} title="Capabilities">
                     <div className={detailBodyClass}>
-                      Product &amp; service concepting · Experience design · Prototyping &amp; MVPs ·
-                      Systems thinking · Design research &amp; synthesis · AI as creative tool ·
-                      Storytelling &amp; narrative
+                    Strategy & product vision · Service & experience design · Hands-on prototyping & making · Systems thinking · Visual & interaction design · Research & synthesis · AI as creative tool · Engineering & technical collaboration
                     </div>
                   </DetailSection>
                   <DetailSection marker={<PlusBadge />} title="Latest explorations">
