@@ -146,7 +146,7 @@ export default function Portfolio() {
   // --- Layout knobs: 3x3 grid, 6 tiles + 3 empty
   const grid: GridSize = { cols: 3, rows: 3 };
   const totalCells = grid.cols * grid.rows; // 9
-  const activeCellIndex = 8; // bottom-right = active tile
+  const activeCellIndex = 2; // top-right = active tile
 
   // Board fills first-half width; cell/gap derived from measured container
   const boardWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -161,10 +161,10 @@ export default function Portfolio() {
   const cell = boardContainerWidth / (grid.cols + (grid.cols - 1) * 0.1); // 3 cells + 2 gaps (gap = cell*0.1)
   const gap = cell * 0.1;
 
-  // puzzle state: tile -> cellIndex (6 tiles; 3 cells empty at 4,6,7)
+  // puzzle state: tile -> cellIndex (6 tiles; 3 cells empty at 2,4,6)
   const [tilePos, setTilePos] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
-    const order = [5, 0, 1, 2, 3, 8]; // ayu last so ayu at 8 (active)
+    const order = [5, 0, 1, 3, 8, 7]; // top-right starts empty so default active tile is none
     tiles.forEach((t, i) => (initial[t.id] = order[i]));
     return initial;
   });
@@ -175,7 +175,7 @@ export default function Portfolio() {
     return Array.from({ length: totalCells }, (_, i) => i).filter((i) => !occupied.has(i));
   }, [tilePos, totalCells]);
 
-  // active = tile in bottom-right (index 8)
+  // active = tile in top-right (index 2)
   const activeTile = useMemo(() => {
     for (const t of tiles) {
       if (tilePos[t.id] === activeCellIndex) return t;
@@ -382,7 +382,13 @@ export default function Portfolio() {
 
     const id = st.id;
     const el = tileRefs.current[id];
-    if (!el) return;
+    if (!el) {
+      dragState.current.id = null;
+      dragState.current.axis = null;
+      dragState.current.targetIndex = null;
+      dragState.current.pointerId = null;
+      return;
+    }
 
     const dx = e.clientX - st.startX;
     const dy = e.clientY - st.startY;
@@ -392,6 +398,7 @@ export default function Portfolio() {
     const axis = st.axis;
     const targetIndex = st.targetIndex;
 
+    let shouldSwap = false;
     if (
       axis !== null &&
       targetIndex !== null &&
@@ -401,11 +408,21 @@ export default function Portfolio() {
       let travel = axis === "x" ? dx : dy;
       travel *= st.sign;
       travel = Math.max(0, Math.min(st.max, travel));
-      const shouldSwap = travel > st.max * 0.45;
+      shouldSwap = travel > st.max * 0.3;
 
       if (shouldSwap) {
         setTilePos((prev) => ({ ...prev, [id]: targetIndex }));
       }
+    }
+
+    // Always snap back if no swap happened so a tile can never rest between cells.
+    if (!shouldSwap) {
+      gsap.to(el, {
+        x: st.baseX,
+        y: st.baseY,
+        duration: 0.22,
+        ease: "power3.out",
+      });
     }
 
     dragState.current.id = null;
@@ -467,38 +484,49 @@ export default function Portfolio() {
                       left: cellXY(idx, grid.cols, cell, gap).x,
                       top: cellXY(idx, grid.cols, cell, gap).y,
                     }}
-                  />
+                  >
+                    {idx === activeCellIndex ? (
+                      <div className="flex h-full w-full items-center justify-center px-4 text-center text-[28px] font-semibold leading-[1.1] text-gray-450">
+                        Drag here to learn more
+                      </div>
+                    ) : null}
+                  </div>
                 ))}
 
                 {/* Tiles */}
-                {tiles.map((tile) => (
-                  <button
-                    key={tile.id}
-                    ref={(node) => {
-                      tileRefs.current[tile.id] = node;
-                    }}
-                    type="button"
-                    onPointerDown={onTilePointerDown(tile)}
-                    className={[
-                      "absolute left-0 top-0",
-                      "rounded-[10px] bg-[#f3f3f3] overflow-hidden",
-                      "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
-                      "transition-opacity duration-200",
-                    ].join(" ")}
-                    style={{ width: cell, height: cell }}
-                    aria-label={`Tile: ${tile.title}`}
-                  >
-                    <Image
-                      src={tile.thumb}
-                      alt={tile.title}
-                      width={360}
-                      height={360}
-                      className="h-full w-full object-cover"
-                      draggable={false}
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 hover:bg-white/10" />
-                  </button>
-                ))}
+                {tiles.map((tile) => {
+                  const isActive = tilePos[tile.id] === activeCellIndex;
+                  return (
+                    <button
+                      key={tile.id}
+                      ref={(node) => {
+                        tileRefs.current[tile.id] = node;
+                      }}
+                      type="button"
+                      onPointerDown={onTilePointerDown(tile)}
+                      className={[
+                        "absolute left-0 top-0 bg-[#f3f3f3] overflow-hidden",
+                        isActive
+                          ? "z-10 rounded-[10px] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
+                          : "rounded-[10px]",
+                        "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
+                        "transition-opacity duration-200",
+                      ].join(" ")}
+                      style={{ width: cell, height: cell }}
+                      aria-label={`Tile: ${tile.title}`}
+                    >
+                      <Image
+                        src={tile.thumb}
+                        alt={tile.title}
+                        width={360}
+                        height={360}
+                        className="h-full w-full object-cover"
+                        draggable={false}
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 hover:bg-white/10" />
+                    </button>
+                  );
+                })}
                 </div>
               </div>
             </div>
@@ -510,7 +538,6 @@ export default function Portfolio() {
               >
                 Shuffle
               </button>
-              <span>Slide a tile to see its details. ↑</span>
             </div>
           </div>
         </div>
