@@ -17,7 +17,7 @@ type Project = {
 
 function NumberBadge({ n }: { n: number }) {
   return (
-    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[11px] font-medium text-[#111]">
+    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[10px] font-medium text-[#111] md:text-[11px]">
       {n}
     </div>
   );
@@ -164,7 +164,7 @@ export default function Portfolio() {
   // puzzle state: tile -> cellIndex (6 tiles; 3 cells empty at 2,4,6)
   const [tilePos, setTilePos] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
-    const order = [5, 0, 1, 3, 8, 7]; // top-right starts empty so default active tile is none
+    const order = [4, 8, 7, 3, 6, 0]; // empties at top-middle, top-right, middle-right
     tiles.forEach((t, i) => (initial[t.id] = order[i]));
     return initial;
   });
@@ -183,12 +183,21 @@ export default function Portfolio() {
     return null;
   }, [tiles, tilePos, activeCellIndex]);
 
-  // prevent any page scrolling
+  // prevent page scrolling on tablet/desktop, allow natural scroll on mobile
   useEffect(() => {
-    const prev = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = "hidden";
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+
+    const syncOverflow = () => {
+      root.style.overflow = window.innerWidth >= 768 ? "hidden" : "";
+    };
+
+    syncOverflow();
+    window.addEventListener("resize", syncOverflow);
+
     return () => {
-      document.documentElement.style.overflow = prev;
+      window.removeEventListener("resize", syncOverflow);
+      root.style.overflow = prev;
     };
   }, []);
 
@@ -448,17 +457,17 @@ export default function Portfolio() {
   };
 
   return (
-    <div ref={rootRef} className="h-screen w-screen overflow-hidden bg-white text-[#111]">
-      <div className="flex h-full">
+    <div ref={rootRef} className="min-h-screen w-full overflow-x-hidden bg-white text-[#111] md:h-screen md:overflow-hidden">
+      <div className="flex min-h-screen flex-col md:h-full md:min-h-0 md:flex-row">
         {/* Left half: puzzle full height; right padding matches second half left */}
-        <div className="flex min-w-0 flex-1 flex-col py-10 pl-12 pr-12">
-          <div data-entrance className="flex items-center gap-3 text-[12px] font-medium text-[#111]/80">
+        <div className="flex min-w-0 flex-1 flex-col px-5 pb-6 pt-8 sm:px-8 md:py-10 md:pl-12 md:pr-12">
+          <div data-entrance className="flex items-center gap-3 text-[11px] font-medium text-[#111]/80 md:text-[12px]">
             <NumberBadge n={0} />
             <span>Currently on display</span>
           </div>
 
-          <div className="mt-5 flex flex-1 min-h-0 flex-col w-full min-w-0">
-            <div className="flex flex-1 items-center w-full min-w-0">
+          <div className="mt-5 flex w-full min-w-0 flex-col md:flex-1 md:min-h-0">
+            <div className="flex w-full min-w-0 md:flex-1 md:items-center">
               <div ref={boardWrapperRef} className="w-full min-w-0">
                 <div
                   ref={boardRef}
@@ -477,7 +486,9 @@ export default function Portfolio() {
                 {currentEmptyIndices.map((idx) => (
                   <div
                     key={`empty-${idx}`}
-                    className="absolute rounded-[10px] bg-[#f3f3f3]"
+                    className={`absolute rounded-[10px] ${
+                      idx === activeCellIndex ? "bg-[#e9e9e9]" : "bg-[#f3f3f3]"
+                    }`}
                     style={{
                       width: cell,
                       height: cell,
@@ -486,7 +497,7 @@ export default function Portfolio() {
                     }}
                   >
                     {idx === activeCellIndex ? (
-                      <div className="flex h-full w-full items-center justify-center px-4 text-center text-[28px] font-semibold leading-[1.1] text-gray-450">
+                      <div className="flex h-full w-full items-center justify-center px-3 text-center text-[18px] font-semibold leading-[1.15] text-white sm:px-4 sm:text-[22px] md:text-[28px] md:leading-[1.1]">
                         Drag here to learn more
                       </div>
                     ) : null}
@@ -505,10 +516,10 @@ export default function Portfolio() {
                       type="button"
                       onPointerDown={onTilePointerDown(tile)}
                       className={[
-                        "absolute left-0 top-0 bg-[#f3f3f3] overflow-hidden",
+                        "absolute left-0 top-0 overflow-hidden",
                         isActive
-                          ? "z-10 rounded-[10px] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
-                          : "rounded-[10px]",
+                          ? "z-10 rounded-[10px] bg-[#f3f3f3] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
+                          : "rounded-[10px] bg-[#f3f3f3]",
                         "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
                         "transition-opacity duration-200",
                       ].join(" ")}
@@ -530,7 +541,7 @@ export default function Portfolio() {
                 </div>
               </div>
             </div>
-            <div data-entrance className="mt-3 flex items-center justify-between text-[12px] leading-[1.75] text-[#111]/60">
+            <div data-entrance className="mt-4 flex items-center justify-between text-[11px] leading-[1.75] text-[#111]/60 md:mt-3 md:text-[12px]">
               <button
                 type="button"
                 onClick={shuffleTiles}
@@ -543,8 +554,8 @@ export default function Portfolio() {
         </div>
 
         {/* Right half: left padding matches first half right */}
-        <div className="flex min-w-0 flex-1 flex-col border-l border-[#111]/10 py-10 pl-12 pr-12">
-          <div data-entrance className="min-h-0 flex-1 overflow-auto">
+        <div className="flex min-w-0 flex-1 flex-col border-t border-[#111]/10 px-5 pb-8 pt-8 sm:px-8 md:border-l md:border-t-0 md:py-10 md:pl-12 md:pr-12">
+          <div data-entrance className="flex-1 md:min-h-0 md:overflow-auto">
             <div ref={activePanelRef}>
               {activeTile === null ? null : activeTile.isProfile ? (
                 <div className="space-y-6">
@@ -553,8 +564,8 @@ export default function Portfolio() {
                       <NumberBadge n={1} />
                     </div>
                     <div>
-                      <div className="text-[12px] font-medium text-[#111]/85">Profile</div>
-                      <p className="mt-1 text-[12px] leading-[1.75] text-[#111]/60">
+                      <div className="text-[11px] font-medium text-[#111]/85 md:text-[12px]">Profile</div>
+                      <p className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 md:text-[12px] md:leading-[1.75]">
                         {activeTile.description}
                       </p>
                     </div>
@@ -564,8 +575,8 @@ export default function Portfolio() {
                       <NumberBadge n={2} />
                     </div>
                     <div>
-                      <div className="text-[12px] font-medium text-[#111]/85">Education</div>
-                      <div className="mt-1 text-[12px] leading-[1.75] text-[#111]/60">
+                      <div className="text-[11px] font-medium text-[#111]/85 md:text-[12px]">Education</div>
+                      <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 md:text-[12px] md:leading-[1.75]">
                         <div>MSc Digital Design · Amsterdam University of Applied Sciences</div>
                         <div>BSc Mechanical Engineering · University of Twente &amp; Vrije Universiteit Amsterdam</div>
                       </div>
@@ -576,8 +587,8 @@ export default function Portfolio() {
                       <NumberBadge n={3} />
                     </div>
                     <div>
-                      <div className="text-[12px] font-medium text-[#111]/85">Capabilities</div>
-                      <div className="mt-1 text-[12px] leading-[1.75] text-[#111]/60">
+                      <div className="text-[11px] font-medium text-[#111]/85 md:text-[12px]">Capabilities</div>
+                      <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 md:text-[12px] md:leading-[1.75]">
                         Product &amp; service concepting · Experience design · Prototyping &amp; MVPs · Systems thinking ·
                         Design research &amp; synthesis · AI as creative tool · Storytelling &amp; narrative
                       </div>
@@ -585,13 +596,13 @@ export default function Portfolio() {
                   </div>
                   <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
                     <div className="pt-[2px]">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[12px] font-medium text-[#111]/70">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[11px] font-medium text-[#111]/70 md:text-[12px]">
                         +
                       </div>
                     </div>
                     <div>
-                      <div className="text-[12px] font-medium text-[#111]/85">Latest explorations</div>
-                      <div className="mt-1 text-[12px] leading-[1.75] text-[#111]/60">Cursor [12-02-2026]</div>
+                      <div className="text-[11px] font-medium text-[#111]/85 md:text-[12px]">Latest explorations</div>
+                      <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 md:text-[12px] md:leading-[1.75]">Cursor [12-02-2026]</div>
                     </div>
                   </div>
                 </div>
@@ -602,8 +613,8 @@ export default function Portfolio() {
                       <NumberBadge n={1} />
                     </div>
                     <div>
-                      <div className="text-[12px] font-medium text-[#111]/85">{activeTile.title}</div>
-                      <div className="mt-1 text-[12px] leading-[1.75] text-[#111]/60">
+                      <div className="text-[11px] font-medium text-[#111]/85 md:text-[12px]">{activeTile.title}</div>
+                      <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 md:text-[12px] md:leading-[1.75]">
                         <div>{activeTile.roleLine}</div>
                         <p className="mt-1">{activeTile.description}</p>
                       </div>
@@ -615,8 +626,8 @@ export default function Portfolio() {
                         <NumberBadge n={2} />
                       </div>
                       <div>
-                        <div className="text-[12px] font-medium text-[#111]/85">Key points</div>
-                        <div className="mt-1 space-y-1 text-[12px] leading-[1.75] text-[#111]/60">
+                        <div className="text-[11px] font-medium text-[#111]/85 md:text-[12px]">Key points</div>
+                        <div className="mt-1 space-y-1 text-[11px] leading-[1.7] text-[#111]/60 md:text-[12px] md:leading-[1.75]">
                           {activeTile.bullets.map((b) => (
                             <div key={b}>{b}</div>
                           ))}
@@ -627,13 +638,13 @@ export default function Portfolio() {
                   {activeTile.link ? (
                     <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
                       <div className="pt-[2px]">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[12px] font-medium text-[#111]/70">
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[11px] font-medium text-[#111]/70 md:text-[12px]">
                           +
                         </div>
                       </div>
                       <div>
-                        <div className="text-[12px] font-medium text-[#111]/85">More</div>
-                        <div className="mt-1 text-[12px] leading-[1.75] text-[#111]/60">
+                        <div className="text-[11px] font-medium text-[#111]/85 md:text-[12px]">More</div>
+                        <div className="mt-1 text-[11px] leading-[1.7] text-[#111]/60 md:text-[12px] md:leading-[1.75]">
                           <a
                             href={activeTile.link}
                             target={activeTile.link.startsWith("http") ? "_blank" : undefined}
@@ -651,7 +662,7 @@ export default function Portfolio() {
             </div>
           </div>
 
-          <aside data-entrance className="mt-auto pt-8 text-[11px] text-[#111]/55">
+          <aside data-entrance className="mt-8 pt-0 text-[10px] text-[#111]/55 md:mt-auto md:pt-8 md:text-[11px]">
             <div className="flex items-center gap-2">
               <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/70">
                 i
