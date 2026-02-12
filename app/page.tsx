@@ -1,19 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
-
-type Project = {
-  id: string;
-  title: string;
-  roleLine: string;
-  description: string;
-  bullets: string[];
-  thumb: string;
-  links?: { label: string; href: string }[];
-  isProfile?: boolean;
-};
+import {
+  ACTIVE_CELL_HINT_TEXT,
+  AYU_TILE,
+  LOADER_SUBLINE_TEXT,
+  LOADER_TYPE_TEXT,
+  LOADING_GALLERY,
+  TILES,
+  type Project,
+} from "@/app/portfolio-content";
 
 function NumberBadge({ n }: { n: number }) {
   return (
@@ -60,20 +58,65 @@ function getTileTouchAction(from: number, emptyIndices: number[], cols: number):
   return canMoveX ? "pan-y" : "pan-x";
 }
 
+const detailRowClass = "grid grid-cols-[24px_1fr] gap-3";
+const detailTitleClass = "text-[13px] font-medium text-[#111]/85 sm:text-[13px]";
+const detailBodyClass =
+  "mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]";
+const detailLinkClass =
+  "underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]";
+
+function PlusBadge() {
+  return (
+    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[13px] font-medium text-[#111]/70 sm:text-[13px]">
+      +
+    </div>
+  );
+}
+
+function DetailSection({
+  marker,
+  title,
+  children,
+}: {
+  marker: ReactNode;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div data-active-line className={detailRowClass}>
+      <div className="pt-[2px]">{marker}</div>
+      <div>
+        <div className={detailTitleClass}>{title}</div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function Portfolio() {
+  const tiles = TILES;
+  const loadingGallery = LOADING_GALLERY;
+  const loaderTypeText = LOADER_TYPE_TEXT;
+  const loaderSublineText = LOADER_SUBLINE_TEXT;
+  const activeCellHintText = ACTIVE_CELL_HINT_TEXT;
+  const ayuTile = AYU_TILE;
+
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const cursorDotRef = useRef<HTMLDivElement | null>(null);
   const loaderOverlayRef = useRef<HTMLDivElement | null>(null);
   const loaderContentRef = useRef<HTMLDivElement | null>(null);
   const loaderImageFrameRef = useRef<HTMLDivElement | null>(null);
   const loaderCursorRef = useRef<HTMLSpanElement | null>(null);
+  const loaderSublineCursorRef = useRef<HTMLSpanElement | null>(null);
   const activeHintCursorRef = useRef<HTMLSpanElement | null>(null);
   const loaderTypeCharsRef = useRef(0);
+  const loaderSublineCharsRef = useRef(0);
   const loaderImageIndexRef = useRef(0);
   const activeHintCharsRef = useRef(0);
-  const loaderTypeText = "Hello! How Ayu?";
-  const activeCellHintText = "Drag here to learn more";
   const [isLoading, setIsLoading] = useState(true);
+  const [isFinePointer, setIsFinePointer] = useState(false);
   const [loaderTypeChars, setLoaderTypeChars] = useState(0);
+  const [loaderSublineChars, setLoaderSublineChars] = useState(0);
   const [loaderImageIndex, setLoaderImageIndex] = useState(0);
   const [activeHintChars, setActiveHintChars] = useState(0);
 
@@ -82,116 +125,6 @@ export default function Portfolio() {
   const tileRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const activePanelRef = useRef<HTMLDivElement | null>(null);
   const prevActiveIdRef = useRef<string | null>(null);
-
-  const projects: Project[] = useMemo(
-    () => [
-      {
-        id: "brnd",
-        title: "BR-ND People",
-        roleLine: "Design & Innovation Lead · 2021–Present",
-        description:
-          "Creative change agency working on culture, strategy and expression. | Currently working here as design & innovation lead and project manager—shaping internal workflows and tools while leading external client projects across healthcare, public sector and creative industries.",
-        bullets: [
-          "Designing tools and frameworks to support organisational transformation.",
-          "Developing internal workflows and processes to help the studio work better, while managing client delivery and project timelines.",
-          "Contributing to BR-ND People's own brand across visual identity, materials, and digital touchpoints.",
-        ],
-        thumb: "/images/thumb_br-ndpeople.jpg",
-        links: [{ label: "Open", href: "https://br-ndpeople.com" }],
-      },
-      {
-        id: "do",
-        title: "OLVG · D&O (Dokter & Opvang)",
-        roleLine: "Service Design Lead · 2024–2025",
-        description:
-          "Because real care doesn't stop at the exit door. | Healthcare innovation supporting vulnerable patients across hospitals, NGOs and social services.",
-        bullets: [
-          "Designed service flows and digital platforms connecting hospitals, NGOs and public services, each with different constraints and languages.",
-          "Rapidly prototyped and validated tools with frontline staff during actual shifts, iterating based on real use.",
-          "Created systems where accessibility and operational reality both win; nobody should have to choose between what's right and what's possible.",
-        ],
-        thumb: "/images/thumb_do.jpg",
-        links: [
-          { label: "Read article", href: "#do-article" },
-          { label: "Watch Trailer", href: "#do-trailer" },
-          { label: "Download Research Paper", href: "#do-research-paper" },
-        ],
-      },
-      {
-        id: "stroll",
-        title: "Stroll",
-        roleLine: "Founder & Venture Experiment Lead · 2024–2025",
-        description:
-          "What if navigation felt like intuition? | Early-stage product exploring new grounds in AI-powered navigation, no screens required.",
-        bullets: [
-          "Framed product strategy and experimentation roadmap, from idea to testable prototype.",
-          "Designed haptic interaction patterns that guide without directing, working at the intersection of AI, embodied interaction and spatial computing.",
-          "Ran rapid validation cycles to figure out what works, learning by building and testing rather than theorizing.",
-        ],
-        thumb: "/images/thumb_stroll.jpg",
-        links: [{ label: "Open", href: "/stroll" }],
-      },
-      {
-        id: "dms",
-        title: "ASML · DMS Evaluation",
-        roleLine: "Innovation & Systems Design (Thesis) · 2023–2024",
-        description:
-          "When engineers play games, researchers learn how they think. | Research project exploring decision-making in deep-tech semiconductor manufacturing through simulation.",
-        bullets: [
-          "Designed an abstract simulation workshop where systems engineers played through scenarios while researchers observed their thinking patterns.",
-          "Built the game mechanics and facilitation framework that made invisible decision-making visible and analyzable.",
-          "Translated findings into insights about how technical teams navigate uncertainty when stakes are high and information is incomplete, working between design research and engineering rigor.",
-        ],
-        thumb: "/images/thumb_dms.png",
-        links: [{ label: "Download Research Paper", href: "#dms" }],
-      },
-      {
-        id: "tiny",
-        title: "Tiny Troubles",
-        roleLine: "Co-founder · 2019–2021",
-        description:
-          "Planet Earth is worth causing trouble for. | Early-stage platform using Web3 to bridge digital creativity and real-world social impact.",
-        bullets: [
-          "Co-led product strategy and positioning for a platform exploring new grounds, testing how digital art could fund tangible good through emerging tech.",
-          "Designed the experience and brand identity, working at the intersection of Web3, community and social impact.",
-          "Learned what it actually takes to build and ship a product from zero, including legal structures, finances, and keeping a small team aligned when everyone is doing different things.",
-        ],
-        thumb: "/images/thumb_tiny.jpeg",
-        links: [{ label: "Open", href: "#tiny" }],
-      },
-    ],
-    []
-  );
-
-  const ayuTile: Project = useMemo(
-    () => ({
-      id: "ayu",
-      title: "Ayu Koene",
-      roleLine: "Strategic designer",
-      description:
-        "Hello! My name is Ayu. I'm a strategic designer with a background in mechanical engineering, digital design, and brand strategy. I'm experienced in building concepts from early vision to tangible prototypes. I work at the intersection of design, technology, and culture.",
-      bullets: [],
-      thumb: "/images/ayu.jpg",
-      links: [],
-      isProfile: true,
-    }),
-    []
-  );
-
-  const tiles: Project[] = useMemo(() => [...projects, ayuTile], [projects, ayuTile]);
-  const loaderImageCount = 6;
-  const loadingGallery = useMemo(
-    () =>
-      [
-        "/images/ayu03.jpg",
-        "/images/ayu08.jpg",
-        "/images/ayu10.jpg",
-        "/images/ayu18.jpg",
-        "/images/ayu25.jpg",
-        "/images/ayu.jpg",
-      ].slice(0, loaderImageCount),
-    []
-  );
 
   // --- Layout knobs: 3x3 grid, 6 tiles + 3 empty
   const grid: GridSize = { cols: 3, rows: 3 };
@@ -215,6 +148,51 @@ export default function Portfolio() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const media = window.matchMedia("(pointer: fine)");
+    const syncFinePointer = () => setIsFinePointer(media.matches);
+    syncFinePointer();
+    media.addEventListener("change", syncFinePointer);
+    return () => media.removeEventListener("change", syncFinePointer);
+  }, []);
+
+  useEffect(() => {
+    if (!isFinePointer) return;
+    const dot = cursorDotRef.current;
+    if (!dot) return;
+
+    const xTo = gsap.quickTo(dot, "x", { duration: 0.18, ease: "power3.out" });
+    const yTo = gsap.quickTo(dot, "y", { duration: 0.18, ease: "power3.out" });
+
+    const onMove = (event: PointerEvent) => {
+      xTo(event.clientX);
+      yTo(event.clientY);
+      gsap.to(dot, { autoAlpha: 1, duration: 0.18, ease: "sine.out", overwrite: "auto" });
+    };
+    const onLeave = () => {
+      gsap.to(dot, { autoAlpha: 0, duration: 0.2, ease: "sine.out", overwrite: "auto" });
+    };
+    const onDown = () => {
+      gsap.to(dot, { scale: 0.72, duration: 0.16, ease: "sine.out", overwrite: "auto" });
+    };
+    const onUp = () => {
+      gsap.to(dot, { scale: 1, duration: 0.22, ease: "sine.out", overwrite: "auto" });
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerleave", onLeave);
+    window.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointerup", onUp);
+
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [isFinePointer]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     for (const src of loadingGallery) {
       const img = new window.Image();
       img.src = src;
@@ -231,6 +209,7 @@ export default function Portfolio() {
     if (reduce) {
       const rafId = window.requestAnimationFrame(() => {
         setLoaderTypeChars(loaderTypeText.length);
+        setLoaderSublineChars(loaderSublineText.length);
         setLoaderImageIndex(loadingGallery.length - 1);
         setIsLoading(false);
       });
@@ -242,11 +221,13 @@ export default function Portfolio() {
 
     const progressState = { value: 0 };
     const typeState = { chars: 0 };
+    const sublineState = { chars: 0 };
     const totalImages = loadingGallery.length;
-    const progressDuration = 4.6;
+    const progressDuration = 7.2;
     const helloChars = "Hello!".length;
-    const holdDuration = 1.3;
+    const holdDuration = 2.1;
     loaderTypeCharsRef.current = 0;
+    loaderSublineCharsRef.current = 0;
     loaderImageIndexRef.current = 0;
 
     const syncTypeChars = () => {
@@ -254,6 +235,13 @@ export default function Portfolio() {
       if (nextChars !== loaderTypeCharsRef.current) {
         loaderTypeCharsRef.current = nextChars;
         setLoaderTypeChars(nextChars);
+      }
+    };
+    const syncSublineChars = () => {
+      const nextChars = Math.min(loaderSublineText.length, Math.round(sublineState.chars));
+      if (nextChars !== loaderSublineCharsRef.current) {
+        loaderSublineCharsRef.current = nextChars;
+        setLoaderSublineChars(nextChars);
       }
     };
 
@@ -267,7 +255,7 @@ export default function Portfolio() {
       typeState,
       {
         chars: 3,
-        duration: 0.32,
+        duration: 0.46,
         ease: "sine.out",
         onUpdate: syncTypeChars,
       },
@@ -277,31 +265,52 @@ export default function Portfolio() {
       typeState,
       {
         chars: helloChars,
-        duration: 0.52,
+        duration: 0.76,
         ease: "none",
         onUpdate: syncTypeChars,
       },
       ">-0.02"
     );
-    tl.to({}, { duration: 0.68 });
+    tl.to({}, { duration: 0.95 });
     tl.to(typeState, {
       chars: 8,
-      duration: 0.34,
+      duration: 0.48,
       ease: "sine.out",
       onUpdate: syncTypeChars,
     });
-    tl.to({}, { duration: 0.08 });
+    tl.to({}, { duration: 0.14 });
     tl.to(typeState, {
       chars: 7,
-      duration: 0.1,
+      duration: 0.16,
       ease: "none",
       onUpdate: syncTypeChars,
     });
     tl.to(typeState, {
       chars: loaderTypeText.length,
-      duration: 1.12,
+      duration: 1.45,
       ease: "none",
       onUpdate: syncTypeChars,
+    });
+    tl.to({}, { duration: 1.2 });
+    tl.to(sublineState, {
+      chars: "Slide".length,
+      duration: 0.72,
+      ease: "none",
+      onUpdate: syncSublineChars,
+    });
+    tl.to({}, { duration: 0.42 });
+    tl.to(sublineState, {
+      chars: "Slide through".length,
+      duration: 0.96,
+      ease: "none",
+      onUpdate: syncSublineChars,
+    });
+    tl.to({}, { duration: 0.36 });
+    tl.to(sublineState, {
+      chars: loaderSublineText.length,
+      duration: 1.42,
+      ease: "none",
+      onUpdate: syncSublineChars,
     });
     tl.to(
       progressState,
@@ -323,12 +332,12 @@ export default function Portfolio() {
       0
     );
     tl.to({}, { duration: holdDuration });
-    tl.to(contentEl, { autoAlpha: 0, x: -6, duration: 0.45, ease: "sine.inOut" }, ">-0.02");
+    tl.to(contentEl, { autoAlpha: 0, x: -4, duration: 0.62, ease: "sine.inOut" }, ">-0.02");
     tl.to(
       overlayEl,
       {
         autoAlpha: 0,
-        duration: 0.6,
+        duration: 0.82,
         ease: "sine.inOut",
       },
       "<0.04"
@@ -338,9 +347,9 @@ export default function Portfolio() {
       {
         opacity: 1,
         y: 0,
-        duration: 0.82,
+        duration: 0.95,
         ease: "power2.out",
-        stagger: 0.03,
+        stagger: 0.04,
       },
       "<0.08"
     );
@@ -349,27 +358,25 @@ export default function Portfolio() {
     });
 
     return () => tl.kill();
-  }, [loaderTypeText, loadingGallery]);
+  }, [loaderSublineText, loaderTypeText, loadingGallery]);
 
   useEffect(() => {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     if (reduce) return;
 
     const loaderCursor = loaderCursorRef.current;
+    const loaderSublineCursor = loaderSublineCursorRef.current;
     const activeCursor = activeHintCursorRef.current;
     const tweens: gsap.core.Tween[] = [];
 
     if (loaderCursor) {
       tweens.push(
         gsap.to(loaderCursor, {
-          keyframes: [
-            { opacity: 1, duration: 0.2 },
-            { opacity: 0.24, duration: 0.14 },
-            { opacity: 0.92, duration: 0.26 },
-            { opacity: 0.35, duration: 0.1 },
-          ],
+          opacity: 0.28,
+          duration: 0.62,
           repeat: -1,
-          ease: "none",
+          yoyo: true,
+          ease: "sine.inOut",
         })
       );
     }
@@ -377,13 +384,22 @@ export default function Portfolio() {
     if (activeCursor) {
       tweens.push(
         gsap.to(activeCursor, {
-          keyframes: [
-            { opacity: 1, duration: 0.24 },
-            { opacity: 0.2, duration: 0.12 },
-            { opacity: 1, duration: 0.32 },
-          ],
+          opacity: 0.3,
+          duration: 0.58,
           repeat: -1,
-          ease: "none",
+          yoyo: true,
+          ease: "sine.inOut",
+        })
+      );
+    }
+    if (loaderSublineCursor) {
+      tweens.push(
+        gsap.to(loaderSublineCursor, {
+          opacity: 0.28,
+          duration: 0.6,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
         })
       );
     }
@@ -402,11 +418,13 @@ export default function Portfolio() {
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
     if (reduce) return;
 
-    gsap.fromTo(
-      frame,
-      { autoAlpha: 0.82, scale: 1.012 },
-      { autoAlpha: 1, scale: 1, duration: 0.4, ease: "sine.out" }
-    );
+    gsap.to(frame, {
+      autoAlpha: 1,
+      duration: 0.24,
+      ease: "sine.out",
+      overwrite: "auto",
+      startAt: { autoAlpha: 0.96 },
+    });
   }, [loaderImageIndex, isLoading]);
 
   useEffect(() => {
@@ -789,8 +807,15 @@ export default function Portfolio() {
       ref={rootRef}
       className={`min-h-screen w-full overflow-x-hidden bg-white text-[#111]${
         isHorizontalLayout ? " h-screen w-screen overflow-hidden" : ""
-      }`}
+      }${isFinePointer ? " custom-cursor-scope" : ""}`}
     >
+      {isFinePointer ? (
+        <div
+          ref={cursorDotRef}
+          aria-hidden="true"
+          className="pointer-events-none fixed left-0 top-0 z-[160] h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference opacity-0"
+        />
+      ) : null}
       {isLoading ? (
         <div
           ref={loaderOverlayRef}
@@ -805,13 +830,27 @@ export default function Portfolio() {
           >
             <div className="text-[clamp(18px,2.3vw,26px)] font-medium tracking-[0.02em] text-[#111]">
               <span>{loaderTypeText.slice(0, loaderTypeChars)}</span>
-              <span
-                ref={loaderCursorRef}
-                aria-hidden="true"
-                className="ml-1 inline-block w-[0.75ch]"
-              >
-                _
-              </span>
+              {loaderTypeChars < loaderTypeText.length ? (
+                <span
+                  ref={loaderCursorRef}
+                  aria-hidden="true"
+                  className="ml-1 inline-block w-[0.75ch]"
+                >
+                  _
+                </span>
+              ) : null}
+              <br />
+              <span>{loaderSublineText.slice(0, loaderSublineChars)}</span>
+              {loaderTypeChars >= loaderTypeText.length &&
+              loaderSublineChars < loaderSublineText.length ? (
+                <span
+                  ref={loaderSublineCursorRef}
+                  aria-hidden="true"
+                  className="ml-1 inline-block w-[0.75ch]"
+                >
+                  _
+                </span>
+              ) : null}
             </div>
           </div>
           <div
@@ -820,7 +859,6 @@ export default function Portfolio() {
             style={{ width: cell, height: cell, opacity: 0 }}
           >
             <Image
-              key={loadingGallery[loaderImageIndex]}
               src={loadingGallery[loaderImageIndex]}
               alt={`Loading gallery image ${loaderImageIndex + 1}`}
               fill
@@ -874,86 +912,86 @@ export default function Portfolio() {
                   ref={boardRef}
                   data-entrance
                   className="relative select-none"
-                style={{
-                  width: grid.cols * cell + (grid.cols - 1) * gap,
-                  height: grid.rows * cell + (grid.rows - 1) * gap,
-                }}
-                onPointerMove={onBoardPointerMove}
-                onPointerUp={onBoardPointerUp}
-                onPointerCancel={onBoardPointerCancel}
-                aria-label="Sliding puzzle"
-              >
-                {/* Empty cells (3 placeholders) */}
-                {currentEmptyIndices.map((idx) => (
-                  <div
-                    key={`empty-${idx}`}
-                    className={`absolute rounded-[10px] ${
-                      idx === activeCellIndex
-                        ? "border-[2.5px] border-[#ececec]"
-                        : "bg-[#f3f3f3]"
-                    }`}
-                    style={{
-                      width: cell,
-                      height: cell,
-                      left: cellXY(idx, grid.cols, cell, gap).x,
-                      top: cellXY(idx, grid.cols, cell, gap).y,
-                    }}
-                  >
-                    {idx === activeCellIndex ? (
-                      <div
-                        className="flex h-full w-full items-center justify-center px-3 text-center text-[16px] font-semibold leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]"
-                      >
-                        <span>{activeCellHintText.slice(0, activeHintChars)}</span>
-                        {activeHintChars < activeCellHintText.length ? (
-                          <span
-                            ref={activeHintCursorRef}
-                            aria-hidden="true"
-                            className="ml-1 inline-block w-[0.75ch]"
-                          >
-                            _
-                          </span>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </div>
-                ))}
-
-                {/* Tiles */}
-                {tiles.map((tile) => {
-                  const from = tilePos[tile.id];
-                  const isActive = from === activeCellIndex;
-                  const touchAction = getTileTouchAction(from, currentEmptyIndices, grid.cols);
-                  return (
-                    <button
-                      key={tile.id}
-                      ref={(node) => {
-                        tileRefs.current[tile.id] = node;
+                  style={{
+                    width: grid.cols * cell + (grid.cols - 1) * gap,
+                    height: grid.rows * cell + (grid.rows - 1) * gap,
+                  }}
+                  onPointerMove={onBoardPointerMove}
+                  onPointerUp={onBoardPointerUp}
+                  onPointerCancel={onBoardPointerCancel}
+                  aria-label="Sliding puzzle"
+                >
+                  {/* Empty cells (3 placeholders) */}
+                  {currentEmptyIndices.map((idx) => (
+                    <div
+                      key={`empty-${idx}`}
+                      className={`absolute rounded-[10px] ${
+                        idx === activeCellIndex
+                          ? "border-[2.5px] border-[#ececec]"
+                          : "bg-[#f3f3f3]"
+                      }`}
+                      style={{
+                        width: cell,
+                        height: cell,
+                        left: cellXY(idx, grid.cols, cell, gap).x,
+                        top: cellXY(idx, grid.cols, cell, gap).y,
                       }}
-                      type="button"
-                      onPointerDown={onTilePointerDown(tile)}
-                      className={[
-                        "absolute left-0 top-0 overflow-hidden",
-                        isActive
-                          ? "z-10 rounded-[10px] bg-[#f3f3f3] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
-                          : "rounded-[10px] bg-[#f3f3f3]",
-                        "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
-                        "transition-opacity duration-200",
-                      ].join(" ")}
-                      style={{ width: cell, height: cell, touchAction }}
-                      aria-label={`Tile: ${tile.title}`}
                     >
-                      <Image
-                        src={tile.thumb}
-                        alt={tile.title}
-                        width={360}
-                        height={360}
-                        className="h-full w-full object-cover"
-                        draggable={false}
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 hover:bg-white/10" />
-                    </button>
-                  );
-                })}
+                      {idx === activeCellIndex ? (
+                        <div
+                          className="flex h-full w-full items-center justify-center px-3 text-center text-[16px] font-medium leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]"
+                        >
+                          <span>{activeCellHintText.slice(0, activeHintChars)}</span>
+                          {activeHintChars < activeCellHintText.length ? (
+                            <span
+                              ref={activeHintCursorRef}
+                              aria-hidden="true"
+                              className="ml-1 inline-block w-[0.75ch]"
+                            >
+                              _
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+
+                  {/* Tiles */}
+                  {tiles.map((tile) => {
+                    const from = tilePos[tile.id];
+                    const isActive = from === activeCellIndex;
+                    const touchAction = getTileTouchAction(from, currentEmptyIndices, grid.cols);
+                    return (
+                      <button
+                        key={tile.id}
+                        ref={(node) => {
+                          tileRefs.current[tile.id] = node;
+                        }}
+                        type="button"
+                        onPointerDown={onTilePointerDown(tile)}
+                        className={[
+                          "absolute left-0 top-0 overflow-hidden",
+                          isActive
+                            ? "z-10 rounded-[10px] bg-[#f3f3f3] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
+                            : "rounded-[10px] bg-[#f3f3f3]",
+                          "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
+                          "transition-opacity duration-200",
+                        ].join(" ")}
+                        style={{ width: cell, height: cell, touchAction }}
+                        aria-label={`Tile: ${tile.title}`}
+                      >
+                        <Image
+                          src={tile.thumb}
+                          alt={tile.title}
+                          width={360}
+                          height={360}
+                          className="h-full w-full object-cover"
+                          draggable={false}
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 hover:bg-white/10" />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -964,12 +1002,12 @@ export default function Portfolio() {
               <button
                 type="button"
                 onClick={shuffleTiles}
-                className="inline-flex h-9 items-center gap-2 self-start rounded px-0 text-left cursor-pointer underline-offset-2 transition hover:text-[#111] hover:underline focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1"
+                className="group inline-flex h-9 items-center gap-2 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1"
               >
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/60">
                   !
                 </span>
-                Shuffle
+                <span className="underline-offset-2 group-hover:underline">Shuffle</span>
               </button>
               <span aria-hidden="true" className="hidden sm:inline-block text-[#111]/45">
                 ·
@@ -978,7 +1016,7 @@ export default function Portfolio() {
                 Want to add a new project to my display?{" "}
                 <a
                   href="mailto:ayukoene@gmail.com"
-                  className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                  className={detailLinkClass}
                 >
                   Send me a message.
                 </a>
@@ -1002,209 +1040,133 @@ export default function Portfolio() {
             <div ref={activePanelRef}>
               {activeTile === null ? null : activeTile.isProfile ? (
                 <div className="space-y-6">
-                  <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                    <div className="pt-[2px]">
-                      <NumberBadge n={1} />
-                    </div>
-                    <div>
-                      <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Profile</div>
-                      <p className="mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                        {activeTile.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                    <div className="pt-[2px]">
-                      <NumberBadge n={2} />
-                    </div>
-                    <div>
-                      <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Education</div>
-                      <div className="mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                        <div>
-                          <a
-                            href="https://www.masterdigitaldesign.com/alumni/ayu-koene"
-                            target="_blank"
-                            rel="noreferrer"
-                            className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                          >
-                            MSc Digital Design
-                          </a>{" "}
-                          · Amsterdam University of Applied Sciences
-                        </div>
-                        <div>BSc Mechanical Engineering · University of Twente &amp; Vrije Universiteit Amsterdam</div>
+                  <DetailSection marker={<NumberBadge n={1} />} title="Profile">
+                    <p className={detailBodyClass}>{activeTile.description}</p>
+                  </DetailSection>
+                  <DetailSection marker={<NumberBadge n={2} />} title="Education">
+                    <div className={detailBodyClass}>
+                      <div>
+                        <a
+                          href="https://www.masterdigitaldesign.com/alumni/ayu-koene"
+                          target="_blank"
+                          rel="noreferrer"
+                          className={detailLinkClass}
+                        >
+                          MSc Digital Design
+                        </a>{" "}
+                        · Amsterdam University of Applied Sciences
+                      </div>
+                      <div>
+                        BSc Mechanical Engineering · University of Twente &amp; Vrije Universiteit
+                        Amsterdam
                       </div>
                     </div>
-                  </div>
-                  <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                    <div className="pt-[2px]">
-                      <NumberBadge n={3} />
+                  </DetailSection>
+                  <DetailSection marker={<NumberBadge n={3} />} title="Capabilities">
+                    <div className={detailBodyClass}>
+                      Product &amp; service concepting · Experience design · Prototyping &amp; MVPs ·
+                      Systems thinking · Design research &amp; synthesis · AI as creative tool ·
+                      Storytelling &amp; narrative
                     </div>
-                    <div>
-                      <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Capabilities</div>
-                      <div className="mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                        Product &amp; service concepting · Experience design · Prototyping &amp; MVPs · Systems thinking ·
-                        Design research &amp; synthesis · AI as creative tool · Storytelling &amp; narrative
-                      </div>
-                    </div>
-                  </div>
-                  <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                    <div className="pt-[2px]">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[13px] font-medium text-[#111]/70 sm:text-[13px]">
-                        +
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Latest explorations</div>
-                      <div className="mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">Vibe coding</div>
-                    </div>
-                  </div>
+                  </DetailSection>
+                  <DetailSection marker={<PlusBadge />} title="Latest explorations">
+                    <div className={detailBodyClass}>Vibe coding</div>
+                  </DetailSection>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                    <div className="pt-[2px]">
-                      <NumberBadge n={1} />
+                  <DetailSection marker={<NumberBadge n={1} />} title={activeTile.title}>
+                    <div className={detailBodyClass}>
+                      <div>{activeTile.roleLine}</div>
+                      <p className="mt-1">{activeTile.description}</p>
                     </div>
-                    <div>
-                      <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">{activeTile.title}</div>
-                      <div className="mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                        <div>{activeTile.roleLine}</div>
-                        <p className="mt-1">{activeTile.description}</p>
-                      </div>
-                    </div>
-                  </div>
+                  </DetailSection>
                   {activeTile.bullets.length > 0 ? (
-                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                      <div className="pt-[2px]">
-                        <NumberBadge n={2} />
+                    <DetailSection marker={<NumberBadge n={2} />} title="Key points">
+                      <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                        {activeTile.bullets.map((b) => (
+                          <div key={b}>{b}</div>
+                        ))}
                       </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Key points</div>
-                        <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                          {activeTile.bullets.map((b) => (
-                            <div key={b}>{b}</div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    </DetailSection>
                   ) : null}
                   {activeTile.id === "brnd" ? (
-                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                      <div className="pt-[2px]">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[13px] font-medium text-[#111]/70 sm:text-[13px]">
-                          +
-                        </div>
+                    <DetailSection marker={<PlusBadge />} title="Recent builds">
+                      <div className={detailBodyClass}>
+                        <div>Website refresh</div>
+                        <div>23plusone happiness scan + research dashboard platform</div>
+                        <div>Credits: Sinyo Koene | Software Engineer · Data Analyst</div>
                       </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Recent builds</div>
-                        <div className="mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                          <div>Website refresh</div>
-                          <div>23plusone happiness scan + research dashboard platform</div>
-                          <div>Credits: Sinyo Koene | Software Engineer · Data Analyst</div>
-                        </div>
-                      </div>
-                    </div>
+                    </DetailSection>
                   ) : null}
                   {activeTile.id === "do" ? (
-                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                      <div className="pt-[2px]">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[13px] font-medium text-[#111]/70 sm:text-[13px]">
-                          +
-                        </div>
+                    <DetailSection marker={<PlusBadge />} title="Credits">
+                      <div className={detailBodyClass}>
+                        <a
+                          href="https://www.masterdigitaldesign.com/alumni/victor-jimoh-2"
+                          target="_blank"
+                          rel="noreferrer"
+                          className={detailLinkClass}
+                        >
+                          Victor Jimoh
+                        </a>
                       </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Credits</div>
-                        <div className="mt-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                    </DetailSection>
+                  ) : null}
+                  {activeTile.id === "stroll" ? (
+                    <DetailSection marker={<PlusBadge />} title="Credits">
+                      <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                        <div>
+                          Mehmet Bostanci ·{" "}
                           <a
-                            href="https://www.masterdigitaldesign.com/alumni/victor-jimoh-2"
+                            href="https://thingscon.org"
                             target="_blank"
                             rel="noreferrer"
-                            className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                            className={detailLinkClass}
                           >
-                            Victor Jimoh
+                            TH/NGScon
+                          </a>
+                        </div>
+                        <div>
+                          Dani Klein ·{" "}
+                          <a
+                            href="https://ddw.nl"
+                            target="_blank"
+                            rel="noreferrer"
+                            className={detailLinkClass}
+                          >
+                            Dutch Design Week
                           </a>
                         </div>
                       </div>
-                    </div>
-                  ) : null}
-                  {activeTile.id === "stroll" ? (
-                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                      <div className="pt-[2px]">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[13px] font-medium text-[#111]/70 sm:text-[13px]">
-                          +
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Credits</div>
-                        <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                          <div>
-                            Mehmet Bostanci ·{" "}
-                            <a
-                              href="https://thingscon.org"
-                              target="_blank"
-                              rel="noreferrer"
-                              className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                            >
-                              TH/NGScon
-                            </a>
-                          </div>
-                          <div>
-                            Dani Klein ·{" "}
-                            <a
-                              href="https://ddw.nl"
-                              target="_blank"
-                              rel="noreferrer"
-                              className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                            >
-                              Dutch Design Week
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    </DetailSection>
                   ) : null}
                   {activeTile.id === "tiny" ? (
-                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                      <div className="pt-[2px]">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[13px] font-medium text-[#111]/70 sm:text-[13px]">
-                          +
-                        </div>
+                    <DetailSection marker={<PlusBadge />} title="Credits">
+                      <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                        <div>Stefan David von Franquemont · 3D Artist</div>
+                        <div>Sinyo Koene · Software Engineer</div>
+                        <div>Luz David von Franquemont · Storytelling</div>
                       </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">Credits</div>
-                        <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                          <div>Stefan David von Franquemont · 3D Artist</div>
-                          <div>Sinyo Koene · Software Engineer</div>
-                          <div>Luz David von Franquemont · Storytelling</div>
-                        </div>
-                      </div>
-                    </div>
+                    </DetailSection>
                   ) : null}
                   {activeTile.links && activeTile.links.length > 0 ? (
-                    <div data-active-line className="grid grid-cols-[24px_1fr] gap-3">
-                      <div className="pt-[2px]">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[13px] font-medium text-[#111]/70 sm:text-[13px]">
-                          +
-                        </div>
+                    <DetailSection marker={<PlusBadge />} title="More">
+                      <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                        {activeTile.links.map((link) => (
+                          <div key={`${activeTile.id}-${link.label}-${link.href}`}>
+                            <a
+                              href={link.href}
+                              target={link.href.startsWith("http") ? "_blank" : undefined}
+                              rel={link.href.startsWith("http") ? "noreferrer" : undefined}
+                              className={detailLinkClass}
+                            >
+                              {link.label}
+                            </a>
+                          </div>
+                        ))}
                       </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#111]/85 sm:text-[13px]">More</div>
-                        <div className="mt-1 space-y-1 text-[13px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                          {activeTile.links.map((link) => (
-                            <div key={`${activeTile.id}-${link.label}-${link.href}`}>
-                              <a
-                                href={link.href}
-                                target={link.href.startsWith("http") ? "_blank" : undefined}
-                                rel={link.href.startsWith("http") ? "noreferrer" : undefined}
-                                className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
-                              >
-                                {link.label}
-                              </a>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    </DetailSection>
                   ) : null}
                 </div>
               )}
@@ -1227,14 +1189,14 @@ export default function Portfolio() {
                 <span className="block whitespace-normal break-words">
                   Ayu Koene · Amsterdam · Mexico · Remote · +31610672283 ·{" "}
                   <a
-                    className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                    className={detailLinkClass}
                     href="mailto:ayukoene@gmail.com"
                   >
                     ayukoene@gmail.com
                   </a>{" "}
                   ·{" "}
                   <a
-                    className="underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]"
+                    className={detailLinkClass}
                     href="https://nl.linkedin.com/in/ayu-koene-55b63718a"
                     target="_blank"
                     rel="noreferrer"

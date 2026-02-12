@@ -67,6 +67,16 @@
         -webkit-tap-highlight-color: transparent;
     }
 
+    ::selection {
+        color: #fff;
+        background: #2f2f2f;
+    }
+
+    ::-moz-selection {
+        color: #fff;
+        background: #2f2f2f;
+    }
+
     body {
         line-height: inherit
     }
@@ -299,6 +309,13 @@
 
     blockquote,h1,h2,h3,h4,h5,h6,p {
         text-wrap: pretty
+    }
+}
+
+@media (pointer: fine) {
+    .custom-cursor-scope,
+    .custom-cursor-scope * {
+        cursor: none !important;
     }
 }
 

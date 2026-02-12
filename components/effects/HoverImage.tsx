@@ -19,16 +19,14 @@ export default function HoverImage({
   containerClassName,
   priority = false,
 }: HoverImageProps) {
-  const imgClass =
-    effect === "zoom"
-      ? "transition-transform duration-700 ease-out hover:scale-110"
-      : effect === "lift"
-        ? "transition-transform duration-500 ease-out hover:scale-105 hover:-translate-y-2"
-        : effect === "tilt"
-          ? "transition-transform duration-400 ease-out hover:rotate-2 hover:scale-105"
-          : effect === "blur"
-            ? "transition-all duration-500 hover:scale-105 hover:blur-0"
-            : "transition-transform duration-700 ease-out hover:scale-105";
+  const effectClassMap: Record<Effect, string> = {
+    zoom: "transition-transform duration-700 ease-out hover:scale-110",
+    lift: "transition-transform duration-500 ease-out hover:scale-105 hover:-translate-y-2",
+    tilt: "transition-transform duration-400 ease-out hover:rotate-2 hover:scale-105",
+    shine: "transition-transform duration-700 ease-out hover:scale-105",
+    blur: "transition-all duration-500 hover:scale-105 hover:blur-0",
+  };
+  const imgClass = effectClassMap[effect];
 
   return (
     <div className={`overflow-hidden ${containerClassName ?? ""}`}>
