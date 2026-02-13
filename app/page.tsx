@@ -119,18 +119,15 @@ export default function Portfolio() {
   const activeTileImageFrameRef = useRef<HTMLDivElement | null>(null);
   const loaderCursorRef = useRef<HTMLSpanElement | null>(null);
   const loaderSublineCursorRef = useRef<HTMLSpanElement | null>(null);
-  const activeHintCursorRef = useRef<HTMLSpanElement | null>(null);
   const loaderTypeCharsRef = useRef(0);
   const loaderSublineCharsRef = useRef(0);
   const loaderImageIndexRef = useRef(0);
-  const activeHintCharsRef = useRef(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinePointer, setIsFinePointer] = useState(false);
   const [loaderTypeChars, setLoaderTypeChars] = useState(0);
   const [loaderSublineChars, setLoaderSublineChars] = useState(0);
   const [loaderImageIndex, setLoaderImageIndex] = useState(0);
   const [activeTileImageIndex, setActiveTileImageIndex] = useState(0);
-  const [activeHintChars, setActiveHintChars] = useState(0);
 
   // puzzle refs
   const boardRef = useRef<HTMLDivElement | null>(null);
@@ -249,7 +246,7 @@ export default function Portfolio() {
     const textSpeedFactor = 0.65;
     const progressDuration = 4.1;
     const helloChars = "Hello!".length;
-    const holdDuration = 0.4;
+    const holdDuration = 0.6;
     loaderTypeCharsRef.current = 0;
     loaderSublineCharsRef.current = 0;
     loaderImageIndexRef.current = 0;
@@ -403,10 +400,10 @@ export default function Portfolio() {
       {
         autoAlpha: 1,
         yPercent: 0,
-        duration: 0.22,
+        duration: 0.26,
         ease: "power2.out",
       },
-      "<0.02"
+      "<"
     );
     tl.eventCallback("onComplete", () => {
       setIsLoading(false);
@@ -421,7 +418,6 @@ export default function Portfolio() {
 
     const loaderCursor = loaderCursorRef.current;
     const loaderSublineCursor = loaderSublineCursorRef.current;
-    const activeCursor = activeHintCursorRef.current;
     const tweens: gsap.core.Tween[] = [];
 
     if (loaderCursor) {
@@ -436,17 +432,6 @@ export default function Portfolio() {
       );
     }
 
-    if (activeCursor) {
-      tweens.push(
-        gsap.to(activeCursor, {
-          opacity: 0.3,
-          duration: 0.58,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        })
-      );
-    }
     if (loaderSublineCursor) {
       tweens.push(
         gsap.to(loaderSublineCursor, {
@@ -481,56 +466,6 @@ export default function Portfolio() {
       startAt: { autoAlpha: 0.96 },
     });
   }, [loaderImageIndex, isLoading]);
-
-  useEffect(() => {
-    if (isLoading) return;
-
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (reduce) {
-      const rafId = window.requestAnimationFrame(() => {
-        setActiveHintChars(activeCellHintText.length);
-      });
-      return () => window.cancelAnimationFrame(rafId);
-    }
-
-    const typeState = { chars: 0 };
-    const tl = gsap.timeline({ delay: 0.12 });
-    const syncHintChars = () => {
-      const nextChars = Math.min(activeCellHintText.length, Math.floor(typeState.chars));
-      if (nextChars !== activeHintCharsRef.current) {
-        activeHintCharsRef.current = nextChars;
-        setActiveHintChars(nextChars);
-      }
-    };
-
-    tl.eventCallback("onStart", () => {
-      activeHintCharsRef.current = 0;
-      setActiveHintChars(0);
-    });
-    tl.to(typeState, {
-      chars: 6,
-      duration: 0.58,
-      ease: "none",
-      onUpdate: syncHintChars,
-    });
-    tl.to({}, { duration: 0.12 });
-    tl.to(typeState, {
-      chars: 14,
-      duration: 0.72,
-      ease: "none",
-      onUpdate: syncHintChars,
-    });
-    tl.to({}, { duration: 0.08 });
-    tl.to(typeState, {
-      chars: activeCellHintText.length,
-      duration: 1.05,
-      ease: "sine.out",
-      onUpdate: syncHintChars,
-      onComplete: () => setActiveHintChars(activeCellHintText.length),
-    });
-
-    return () => tl.kill();
-  }, [activeCellHintText, isLoading]);
 
   // puzzle state: tile -> cellIndex (6 tiles; 3 cells empty at 2,4,6)
   const [tilePos, setTilePos] = useState<Record<string, number>>(() => {
@@ -1065,7 +1000,7 @@ export default function Portfolio() {
                     <div
                       key={`base-${idx}`}
                       data-pre-tile-cell
-                      className="absolute rounded-[10px] border border-[#e6e6e6] bg-transparent"
+                      className="absolute rounded-[10px] border-[0.75px] border-[#ededed] bg-transparent"
                       style={{
                         width: cell,
                         height: cell,
@@ -1082,7 +1017,7 @@ export default function Portfolio() {
                     <div
                       key={`empty-${idx}`}
                       data-pre-tile-cell
-                      className="absolute rounded-[10px] border-2 border-[#d3d3d3] bg-transparent"
+                      className="absolute rounded-[10px] border border-[#e4e4e4] bg-transparent"
                       style={{
                         width: cell,
                         height: cell,
@@ -1092,18 +1027,9 @@ export default function Portfolio() {
                     >
                       <div
                         data-active-descriptor
-                        className="flex h-full w-full items-center justify-center px-3 text-center text-[18px] font-normal leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]"
+                        className="flex h-full w-full items-center justify-center p-1 text-center whitespace-pre-line text-[14px] font-normal leading-[1.35] text-[#111]/60 sm:p-4 sm:text-[12px]"
                       >
-                        <span>{activeCellHintText.slice(0, activeHintChars)}</span>
-                        {activeHintChars < activeCellHintText.length ? (
-                          <span
-                            ref={activeHintCursorRef}
-                            aria-hidden="true"
-                            className="ml-1 inline-block w-[0.75ch]"
-                          >
-                            _
-                          </span>
-                        ) : null}
+                        <span>{activeCellHintText}</span>
                       </div>
                     </div>
                   ))}

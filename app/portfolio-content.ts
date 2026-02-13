@@ -16,7 +16,7 @@ export type Project = {
 
 export const LOADER_TYPE_TEXT = "Hello! How Ayu?";
 export const LOADER_SUBLINE_TEXT = "Slide through my projects...";
-export const ACTIVE_CELL_HINT_TEXT = "Drag here to learn more.";
+export const ACTIVE_CELL_HINT_TEXT = "Drag here to\n learn more.";
 export const DMS_RESEARCH_PAPER_PDF =
   "/documents/Evaluating_High-tech_Decision-making_Strategies_AyuKoene.pdf";
 export const OLVG_RESEARCH_PAPER_PDF = "/documents/MDD-RR-S2-AyuKoene.pdf";
