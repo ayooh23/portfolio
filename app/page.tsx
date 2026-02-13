@@ -9,6 +9,7 @@ import {
   LOADER_SUBLINE_TEXT,
   LOADER_TYPE_TEXT,
   LOADING_GALLERY,
+  PROJECT_IMAGE_SEQUENCES,
   TILES,
   type Project,
 } from "@/app/portfolio-content";
@@ -67,6 +68,8 @@ const detailLinkClass =
 const splitPaneDesktopTabletPaddingClass = "py-10 px-12";
 const splitPaneHeaderClass = `${detailRowClass} items-center text-[15px] font-medium text-[#111]/80 sm:text-[12px]`;
 const splitPaneFooterBaseClass = "mt-4 min-h-[36px] text-[14px] leading-[1.75] sm:mt-3 sm:text-[12px]";
+const ACTIVE_TILE_SEQUENCE_INTERVAL_MS = 3800;
+const ACTIVE_TILE_TRANSITION_DURATION_S = 0.28;
 
 function PlusBadge() {
   return (
@@ -103,12 +106,17 @@ export default function Portfolio() {
   const loaderSublineText = LOADER_SUBLINE_TEXT;
   const activeCellHintText = ACTIVE_CELL_HINT_TEXT;
   const ayuTile = AYU_TILE;
+  const allProjectSequenceImages = useMemo(
+    () => Array.from(new Set(Object.values(PROJECT_IMAGE_SEQUENCES).flat())),
+    []
+  );
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const cursorDotRef = useRef<HTMLDivElement | null>(null);
   const loaderOverlayRef = useRef<HTMLDivElement | null>(null);
   const loaderContentRef = useRef<HTMLDivElement | null>(null);
   const loaderImageFrameRef = useRef<HTMLDivElement | null>(null);
+  const activeTileImageFrameRef = useRef<HTMLDivElement | null>(null);
   const loaderCursorRef = useRef<HTMLSpanElement | null>(null);
   const loaderSublineCursorRef = useRef<HTMLSpanElement | null>(null);
   const activeHintCursorRef = useRef<HTMLSpanElement | null>(null);
@@ -121,6 +129,7 @@ export default function Portfolio() {
   const [loaderTypeChars, setLoaderTypeChars] = useState(0);
   const [loaderSublineChars, setLoaderSublineChars] = useState(0);
   const [loaderImageIndex, setLoaderImageIndex] = useState(0);
+  const [activeTileImageIndex, setActiveTileImageIndex] = useState(0);
   const [activeHintChars, setActiveHintChars] = useState(0);
 
   // puzzle refs
@@ -196,11 +205,11 @@ export default function Portfolio() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    for (const src of loadingGallery) {
+    for (const src of allProjectSequenceImages) {
       const img = new window.Image();
       img.src = src;
     }
-  }, [loadingGallery]);
+  }, [allProjectSequenceImages]);
 
   useEffect(() => {
     const overlayEl = loaderOverlayRef.current;
@@ -226,6 +235,7 @@ export default function Portfolio() {
     const typeState = { chars: 0 };
     const sublineState = { chars: 0 };
     const totalImages = loadingGallery.length;
+    const textSpeedFactor = 0.65;
     const progressDuration = 7.2;
     const helloChars = "Hello!".length;
     const holdDuration = 2.1;
@@ -258,7 +268,7 @@ export default function Portfolio() {
       typeState,
       {
         chars: 3,
-        duration: 0.32,
+        duration: 0.32 * textSpeedFactor,
         ease: "sine.out",
         onUpdate: syncTypeChars,
       },
@@ -268,50 +278,50 @@ export default function Portfolio() {
       typeState,
       {
         chars: helloChars,
-        duration: 0.5,
+        duration: 0.5 * textSpeedFactor,
         ease: "none",
         onUpdate: syncTypeChars,
       },
       ">-0.02"
     );
-    tl.to({}, { duration: 0.45 });
+    tl.to({}, { duration: 0.45 * textSpeedFactor });
     tl.to(typeState, {
       chars: 8,
-      duration: 0.3,
+      duration: 0.3 * textSpeedFactor,
       ease: "sine.out",
       onUpdate: syncTypeChars,
     });
-    tl.to({}, { duration: 0.08 });
+    tl.to({}, { duration: 0.08 * textSpeedFactor });
     tl.to(typeState, {
       chars: 7,
-      duration: 0.1,
+      duration: 0.1 * textSpeedFactor,
       ease: "none",
       onUpdate: syncTypeChars,
     });
     tl.to(typeState, {
       chars: loaderTypeText.length,
-      duration: 0.9,
+      duration: 0.9 * textSpeedFactor,
       ease: "none",
       onUpdate: syncTypeChars,
     });
-    tl.to({}, { duration: 0.6 });
+    tl.to({}, { duration: 0.6 * textSpeedFactor });
     tl.to(sublineState, {
       chars: "Slide".length,
-      duration: 0.46,
+      duration: 0.46 * textSpeedFactor,
       ease: "none",
       onUpdate: syncSublineChars,
     });
-    tl.to({}, { duration: 0.2 });
+    tl.to({}, { duration: 0.2 * textSpeedFactor });
     tl.to(sublineState, {
       chars: "Slide through".length,
-      duration: 0.62,
+      duration: 0.62 * textSpeedFactor,
       ease: "none",
       onUpdate: syncSublineChars,
     });
-    tl.to({}, { duration: 0.16 });
+    tl.to({}, { duration: 0.16 * textSpeedFactor });
     tl.to(sublineState, {
       chars: loaderSublineText.length,
-      duration: 0.86,
+      duration: 0.86 * textSpeedFactor,
       ease: "none",
       onUpdate: syncSublineChars,
     });
@@ -574,6 +584,55 @@ export default function Portfolio() {
     }
     return null;
   }, [tiles, tilePos, activeCellIndex]);
+
+  const activeTileGallery = useMemo(() => {
+    if (!activeTile) return [];
+    const sequence = PROJECT_IMAGE_SEQUENCES[activeTile.id];
+    if (!sequence || sequence.length === 0) return [activeTile.thumb];
+    return sequence;
+  }, [activeTile]);
+
+  useEffect(() => {
+    if (activeTileGallery.length <= 1 || isLoading) return;
+
+    const resetRafId = window.requestAnimationFrame(() => {
+      setActiveTileImageIndex(0);
+    });
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) {
+      return () => window.cancelAnimationFrame(resetRafId);
+    }
+
+    const intervalId = window.setInterval(() => {
+      setActiveTileImageIndex((prev) => (prev + 1) % activeTileGallery.length);
+    }, ACTIVE_TILE_SEQUENCE_INTERVAL_MS);
+
+    return () => {
+      window.cancelAnimationFrame(resetRafId);
+      window.clearInterval(intervalId);
+    };
+  }, [activeTile?.id, activeTileGallery.length, isLoading]);
+
+  useEffect(() => {
+    if (activeTileGallery.length <= 1 || isLoading) return;
+
+    const frame = activeTileImageFrameRef.current;
+    if (!frame) return;
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) return;
+
+    gsap.fromTo(
+      frame,
+      { autoAlpha: 0.86 },
+      {
+        autoAlpha: 1,
+        duration: ACTIVE_TILE_TRANSITION_DURATION_S,
+        ease: "power2.out",
+        overwrite: "auto",
+      }
+    );
+  }, [activeTile?.id, activeTileGallery.length, activeTileImageIndex, isLoading]);
 
   // keep mobile in document flow; lock to horizontal split on tablet/desktop
   useEffect(() => {
@@ -992,6 +1051,11 @@ export default function Portfolio() {
                   {tiles.map((tile) => {
                     const from = tilePos[tile.id];
                     const isActive = from === activeCellIndex;
+                    const shouldSwapImage =
+                      isActive && activeTile?.id === tile.id && activeTileGallery.length > 1;
+                    const tileImageSrc = shouldSwapImage
+                      ? activeTileGallery[activeTileImageIndex % activeTileGallery.length]
+                      : tile.thumb;
                     const touchAction = getTileTouchAction(from, currentEmptyIndices, grid.cols);
                     return (
                       <button
@@ -1012,14 +1076,19 @@ export default function Portfolio() {
                         style={{ width: cell, height: cell, touchAction }}
                         aria-label={`Tile: ${tile.title}`}
                       >
-                        <Image
-                          src={tile.thumb}
-                          alt={tile.title}
-                          width={360}
-                          height={360}
-                          className="h-full w-full object-cover"
-                          draggable={false}
-                        />
+                        <div
+                          ref={shouldSwapImage ? activeTileImageFrameRef : undefined}
+                          className="relative h-full w-full"
+                        >
+                          <Image
+                            src={tileImageSrc}
+                            alt={tile.title}
+                            fill
+                            sizes={`${Math.max(120, Math.round(cell))}px`}
+                            className="object-cover"
+                            draggable={false}
+                          />
+                        </div>
                         <div className="pointer-events-none absolute inset-0 bg-white/0 transition duration-300 hover:bg-white/10" />
                       </button>
                     );
@@ -1030,19 +1099,29 @@ export default function Portfolio() {
             </div>
             <div
               data-entrance
-              className={`${splitPaneFooterBaseClass} flex w-full flex-wrap items-center gap-x-3 gap-y-2 text-[#111]/60 sm:flex-nowrap sm:gap-4`}
+              className={`${splitPaneFooterBaseClass} flex w-full text-[#111]/60 ${
+                isHorizontalLayout
+                  ? "flex-row flex-nowrap items-center gap-4"
+                  : "flex-col items-start gap-2"
+              }`}
             >
               <button
                 type="button"
                 onClick={shuffleTiles}
-                className="group inline-flex h-9 items-center gap-3 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1"
+                className={`group inline-flex h-9 items-center gap-3 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1 ${
+                  isHorizontalLayout ? "shrink-0 whitespace-nowrap" : ""
+                }`}
               >
                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[#111]/15 text-[#111]/60">
                   !
                 </span>
                 <span className="underline-offset-2 group-hover:underline">Shuffle</span>
               </button>
-              <div className="min-w-0 flex-1 text-left text-[#111]/55">
+              <div
+                className={`text-left text-[#111]/55 ${
+                  isHorizontalLayout ? "min-w-0 flex-1 whitespace-nowrap" : "w-full"
+                }`}
+              >
                 Want to add a new project to my display?{" "}
                 <a
                   href="mailto:ayukoene@gmail.com"
@@ -1187,21 +1266,10 @@ export default function Portfolio() {
                   ) : null}
                   {activeTile.id === "tiny" ? (
                     <DetailSection marker={<PlusBadge />} title="Credits">
-                      <div className="mt-1 flex h-full min-h-[220px] flex-col text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                        <div className="space-y-1">
-                          <div>Stefan David von Franquemont · 3D Artist</div>
-                          <div>Sinyo Koene · Software Engineer</div>
-                          <div>Luz David von Franquemont · Storytelling</div>
-                        </div>
-                        <div className="mt-auto flex justify-end pt-2">
-                          <Image
-                            src="/images/Solol_Ladybug_Red.png"
-                            alt="Solol Ladybug Red"
-                            width={420}
-                            height={320}
-                            className="h-auto w-full max-w-[180px]"
-                          />
-                        </div>
+                      <div className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                        <div>Stefan David von Franquemont · 3D Artist</div>
+                        <div>Sinyo Koene · Software Engineer</div>
+                        <div>Luz David von Franquemont · Storytelling</div>
                       </div>
                     </DetailSection>
                   ) : null}

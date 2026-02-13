@@ -36,7 +36,7 @@ export const PROJECTS: Project[] = [
     title: "BR-ND People",
     roleLine: "Design & Innovation Lead · 2021–Present",
     description:
-      "Creative change agency working on culture, strategy and expression. | Currently working here as design & innovation lead and project manager—shaping internal workflows and tools while leading external client projects across healthcare, public sector and creative industries.",
+      "Creative change agency working on culture, strategy, and expression. | Currently working here as design & innovation lead and project manager—shaping internal workflows and tools while leading external client projects across healthcare, public sector, and creative industries.",
     bullets: [
       "Designing tools and frameworks to support organisational transformation.",
       "Developing internal workflows and processes to help the studio work better, while managing client delivery and project timelines.",
@@ -50,9 +50,9 @@ export const PROJECTS: Project[] = [
     title: "OLVG · D&O (Dokter & Opvang)",
     roleLine: "Service Design Lead · 2024–2025",
     description:
-      "Because real care doesn't stop at the exit door. | Healthcare innovation supporting vulnerable patients across hospitals, NGOs and social services.",
+      "Because real care doesn't stop at the exit door. | Healthcare innovation supporting vulnerable patients across hospitals, NGOs, and social services.",
     bullets: [
-      "Designed service flows and digital platforms connecting hospitals, NGOs and public services, each with different constraints and languages.",
+      "Designed service flows and digital platforms connecting hospitals, NGOs, and public services, each with different constraints and languages.",
       "Rapidly prototyped and validated tools with frontline staff during actual shifts, iterating based on real use.",
       "Created systems where accessibility and operational reality both win; nobody should have to choose between what's right and what's possible.",
     ],
@@ -74,7 +74,7 @@ export const PROJECTS: Project[] = [
       "What if navigation felt like intuition? | Early-stage product exploring new grounds in AI-powered navigation, no screens required.",
     bullets: [
       "Framed product strategy and experimentation roadmap, from idea to testable prototype.",
-      "Designed haptic interaction patterns that guide without directing, working at the intersection of AI, embodied interaction and spatial computing.",
+      "Designed haptic interaction patterns that guide without directing, working at the intersection of AI, embodied interaction, and spatial computing.",
       "Ran rapid validation cycles to figure out what works, learning by building and testing rather than theorizing.",
     ],
     thumb: "/images/thumb_stroll.jpg",
@@ -106,7 +106,7 @@ export const PROJECTS: Project[] = [
       "Planet Earth is worth causing trouble for. | Early-stage platform using Web3 to bridge digital creativity and real-world social impact.",
     bullets: [
       "Co-led product strategy and positioning for a platform exploring new grounds, testing how digital art could fund tangible good through emerging tech.",
-      "Designed the experience and brand identity, working at the intersection of Web3, community and social impact.",
+      "Designed the experience and brand identity, working at the intersection of Web3, community, and social impact.",
       "Learned what it actually takes to build and ship a product from zero, including legal structures, finances, and keeping a small team aligned when everyone is doing different things.",
     ],
     thumb: "/images/thumb_tiny.jpeg",
@@ -119,7 +119,7 @@ export const AYU_TILE: Project = {
   title: "Ayu Koene",
   roleLine: "Strategic designer",
   description:
-    "Hello! My name is Ayu. I'm a strategic designer with a background in mechanical engineering, digital design, and brand strategy. I'm experienced in building concepts from early vision to tangible prototypes. I work at the intersection of design, technology, and culture.",
+    "Hello! My name is Ayu. I'm a strategic designer with a background in mechanical engineering, digital design, and brand strategy. I specialize in building concepts from early vision to tangible outcomes, working at the intersection of design, technology, and business. For as long as I can remember, I've been passionate about creating appealing & functional things, on- and offline.",
   bullets: [],
   thumb: "/images/ayu.jpg",
   links: [],
@@ -127,3 +127,32 @@ export const AYU_TILE: Project = {
 };
 
 export const TILES: Project[] = [...PROJECTS, AYU_TILE];
+
+export const PROJECT_IMAGE_SEQUENCES: Record<string, string[]> = {
+  ayu: LOADING_GALLERY,
+  brnd: [
+    "/images/thumb_br-ndpeople.jpg",
+    "/images/projects/brnd/brnd1.jpg",
+    "/images/projects/brnd/brnd2.gif",
+  ],
+  do: [
+    "/images/thumb_do.jpg",
+    "/images/projects/do/do1.png",
+  ],
+  stroll: [
+    "/images/thumb_stroll.jpg",
+    "/images/projects/stroll/stroll1.png",
+    "/images/projects/stroll/stroll2.jpg",
+    "/images/projects/stroll/stroll3.png",
+  ],
+  dms: [
+    "/images/thumb_dms.png",
+  ],
+  tiny: [
+    "/images/thumb_tiny.jpeg",
+    "/images/projects/tiny/tiny1.jpeg",
+    "/images/projects/tiny/tiny2.jpeg",
+    "/images/projects/tiny/tiny3.jpeg",
+    "/images/projects/tiny/tiny4.png",
+  ],
+};
