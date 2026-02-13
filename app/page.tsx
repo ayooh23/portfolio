@@ -229,16 +229,27 @@ export default function Portfolio() {
     }
 
     const entranceEls = rootEl.querySelectorAll("[data-entrance]");
+    const preTileCellEls = rootEl.querySelectorAll("[data-pre-tile-cell]");
+    const dropTileEls = rootEl.querySelectorAll("[data-tile-drop]");
+    const activeDescriptorEl = rootEl.querySelectorAll("[data-active-descriptor]");
     gsap.set(entranceEls, { opacity: 0, y: 6 });
+    gsap.set(preTileCellEls, { autoAlpha: 0 });
+    gsap.set(dropTileEls, {
+      autoAlpha: 0,
+      yPercent: 1.5,
+      scale: 1.085,
+      transformOrigin: "50% 50%",
+    });
+    gsap.set(activeDescriptorEl, { autoAlpha: 0, yPercent: 1.2 });
 
     const progressState = { value: 0 };
     const typeState = { chars: 0 };
     const sublineState = { chars: 0 };
     const totalImages = loadingGallery.length;
     const textSpeedFactor = 0.65;
-    const progressDuration = 7.2;
+    const progressDuration = 4.1;
     const helloChars = "Hello!".length;
-    const holdDuration = 2.1;
+    const holdDuration = 0.4;
     loaderTypeCharsRef.current = 0;
     loaderSublineCharsRef.current = 0;
     loaderImageIndexRef.current = 0;
@@ -345,12 +356,12 @@ export default function Portfolio() {
       0
     );
     tl.to({}, { duration: holdDuration });
-    tl.to(contentEl, { autoAlpha: 0, x: -4, duration: 0.62, ease: "sine.inOut" }, ">-0.02");
+    tl.to(contentEl, { autoAlpha: 0, x: -4, duration: 0.42, ease: "sine.inOut" }, ">-0.02");
     tl.to(
       overlayEl,
       {
         autoAlpha: 0,
-        duration: 0.82,
+        duration: 0.56,
         ease: "sine.inOut",
       },
       "<0.04"
@@ -365,6 +376,37 @@ export default function Portfolio() {
         stagger: 0.04,
       },
       "<0.08"
+    );
+    tl.to(
+      preTileCellEls,
+      {
+        autoAlpha: 1,
+        duration: 0.16,
+        ease: "sine.out",
+      },
+      ">0.04"
+    );
+    tl.to(
+      dropTileEls,
+      {
+        autoAlpha: 1,
+        yPercent: 0,
+        scale: 1,
+        duration: 0.26,
+        ease: "power2.out",
+        stagger: 0.016,
+      },
+      ">0.52"
+    );
+    tl.to(
+      activeDescriptorEl,
+      {
+        autoAlpha: 1,
+        yPercent: 0,
+        duration: 0.22,
+        ease: "power2.out",
+      },
+      "<0.02"
     );
     tl.eventCallback("onComplete", () => {
       setIsLoading(false);
@@ -452,7 +494,7 @@ export default function Portfolio() {
     }
 
     const typeState = { chars: 0 };
-    const tl = gsap.timeline({ delay: 0.26 });
+    const tl = gsap.timeline({ delay: 0.12 });
     const syncHintChars = () => {
       const nextChars = Math.min(activeCellHintText.length, Math.floor(typeState.chars));
       if (nextChars !== activeHintCharsRef.current) {
@@ -591,6 +633,11 @@ export default function Portfolio() {
     if (!sequence || sequence.length === 0) return [activeTile.thumb];
     return sequence;
   }, [activeTile]);
+  const nonProfileCellIndices = useMemo(
+    () =>
+      Array.from({ length: totalCells }, (_, idx) => idx).filter((idx) => idx !== profileTileIndex),
+    [profileTileIndex, totalCells]
+  );
 
   useEffect(() => {
     if (activeTileGallery.length <= 1 || isLoading) return;
@@ -667,11 +714,12 @@ export default function Portfolio() {
       gsap.to(el, {
         x,
         y,
-        duration: 0.45,
+        duration: isLoading ? 0 : 0.45,
         ease: "power3.out",
+        overwrite: "auto",
       });
     }
-  }, [tilePos, tiles, grid.cols, cell, gap]);
+  }, [tilePos, tiles, grid.cols, cell, gap, isLoading]);
 
   // Animate active panel content when activeTile changes (not on first paint)
   useEffect(() => {
@@ -1012,15 +1060,29 @@ export default function Portfolio() {
                   onPointerCancel={onBoardPointerCancel}
                   aria-label="Sliding puzzle"
                 >
-                  {/* Empty cells (3 placeholders) */}
-                  {currentEmptyIndices.map((idx) => (
+                  {/* Grey base cells for all non-profile positions */}
+                  {nonProfileCellIndices.map((idx) => (
+                    <div
+                      key={`base-${idx}`}
+                      data-pre-tile-cell
+                      className="absolute rounded-[10px] border border-[#e6e6e6] bg-transparent"
+                      style={{
+                        width: cell,
+                        height: cell,
+                        left: cellXY(idx, grid.cols, cell, gap).x,
+                        top: cellXY(idx, grid.cols, cell, gap).y,
+                      }}
+                    />
+                  ))}
+
+                  {/* Active empty cell indicator */}
+                  {currentEmptyIndices
+                    .filter((idx) => idx === activeCellIndex)
+                    .map((idx) => (
                     <div
                       key={`empty-${idx}`}
-                      className={`absolute rounded-[10px] ${
-                        idx === activeCellIndex
-                          ? "border-[2.5px] border-[#ececec]"
-                          : "bg-[#f3f3f3]"
-                      }`}
+                      data-pre-tile-cell
+                      className="absolute rounded-[10px] border-2 border-[#d3d3d3] bg-transparent"
                       style={{
                         width: cell,
                         height: cell,
@@ -1028,22 +1090,21 @@ export default function Portfolio() {
                         top: cellXY(idx, grid.cols, cell, gap).y,
                       }}
                     >
-                      {idx === activeCellIndex ? (
-                        <div
-                          className="flex h-full w-full items-center justify-center px-3 text-center text-[18px] font-medium leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]"
-                        >
-                          <span>{activeCellHintText.slice(0, activeHintChars)}</span>
-                          {activeHintChars < activeCellHintText.length ? (
-                            <span
-                              ref={activeHintCursorRef}
-                              aria-hidden="true"
-                              className="ml-1 inline-block w-[0.75ch]"
-                            >
-                              _
-                            </span>
-                          ) : null}
-                        </div>
-                      ) : null}
+                      <div
+                        data-active-descriptor
+                        className="flex h-full w-full items-center justify-center px-3 text-center text-[18px] font-normal leading-[1.15] text-[#d6d6d6] sm:px-4 sm:text-[22px] sm:leading-[1.1]"
+                      >
+                        <span>{activeCellHintText.slice(0, activeHintChars)}</span>
+                        {activeHintChars < activeCellHintText.length ? (
+                          <span
+                            ref={activeHintCursorRef}
+                            aria-hidden="true"
+                            className="ml-1 inline-block w-[0.75ch]"
+                          >
+                            _
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   ))}
 
@@ -1060,6 +1121,8 @@ export default function Portfolio() {
                     return (
                       <button
                         key={tile.id}
+                        data-tile
+                        data-tile-drop={tile.id === ayuTile.id ? undefined : "true"}
                         ref={(node) => {
                           tileRefs.current[tile.id] = node;
                         }}
