@@ -64,6 +64,9 @@ const detailBodyClass =
   "mt-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]";
 const detailLinkClass =
   "underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111]";
+const splitPaneDesktopTabletPaddingClass = "py-10 px-12";
+const splitPaneHeaderClass = `${detailRowClass} items-center text-[15px] font-medium text-[#111]/80 sm:text-[12px]`;
+const splitPaneFooterBaseClass = "mt-4 min-h-[36px] text-[14px] leading-[1.75] sm:mt-3 sm:text-[12px]";
 
 function PlusBadge() {
   return (
@@ -255,7 +258,7 @@ export default function Portfolio() {
       typeState,
       {
         chars: 3,
-        duration: 0.46,
+        duration: 0.32,
         ease: "sine.out",
         onUpdate: syncTypeChars,
       },
@@ -265,50 +268,50 @@ export default function Portfolio() {
       typeState,
       {
         chars: helloChars,
-        duration: 0.76,
+        duration: 0.5,
         ease: "none",
         onUpdate: syncTypeChars,
       },
       ">-0.02"
     );
-    tl.to({}, { duration: 0.95 });
+    tl.to({}, { duration: 0.45 });
     tl.to(typeState, {
       chars: 8,
-      duration: 0.48,
+      duration: 0.3,
       ease: "sine.out",
       onUpdate: syncTypeChars,
     });
-    tl.to({}, { duration: 0.14 });
+    tl.to({}, { duration: 0.08 });
     tl.to(typeState, {
       chars: 7,
-      duration: 0.16,
+      duration: 0.1,
       ease: "none",
       onUpdate: syncTypeChars,
     });
     tl.to(typeState, {
       chars: loaderTypeText.length,
-      duration: 1.45,
+      duration: 0.9,
       ease: "none",
       onUpdate: syncTypeChars,
     });
-    tl.to({}, { duration: 1.2 });
+    tl.to({}, { duration: 0.6 });
     tl.to(sublineState, {
       chars: "Slide".length,
-      duration: 0.72,
+      duration: 0.46,
       ease: "none",
       onUpdate: syncSublineChars,
     });
-    tl.to({}, { duration: 0.42 });
+    tl.to({}, { duration: 0.2 });
     tl.to(sublineState, {
       chars: "Slide through".length,
-      duration: 0.96,
+      duration: 0.62,
       ease: "none",
       onUpdate: syncSublineChars,
     });
-    tl.to({}, { duration: 0.36 });
+    tl.to({}, { duration: 0.16 });
     tl.to(sublineState, {
       chars: loaderSublineText.length,
-      duration: 1.42,
+      duration: 0.86,
       ease: "none",
       onUpdate: syncSublineChars,
     });
@@ -908,12 +911,17 @@ export default function Portfolio() {
         <div
           className={
             isHorizontalLayout
-              ? "flex min-w-0 flex-1 basis-1/2 max-w-1/2 shrink-0 grow-0 flex-col py-10 pl-12 pr-12"
+              ? `flex min-w-0 flex-1 basis-1/2 max-w-1/2 shrink-0 grow-0 flex-col ${splitPaneDesktopTabletPaddingClass}`
               : "flex min-w-0 flex-col px-5 pb-6 pt-8"
           }
         >
-          <div data-entrance className="flex items-center gap-3 text-[15px] font-medium text-[#111]/80 sm:text-[12px]">
-            <NumberBadge n={0} />
+          <div
+            data-entrance
+            className={splitPaneHeaderClass}
+          >
+            <div className="pt-[2px]">
+              <NumberBadge n={0} />
+            </div>
             <span>Currently on display</span>
           </div>
 
@@ -1016,12 +1024,13 @@ export default function Portfolio() {
                       </button>
                     );
                   })}
+
                 </div>
               </div>
             </div>
             <div
               data-entrance
-              className="mt-4 grid w-full grid-cols-1 gap-2 text-[14px] leading-[1.75] text-[#111]/60 sm:mt-3 sm:min-h-[36px] sm:grid-cols-[auto_auto_1fr] sm:items-center sm:gap-4 sm:text-[12px]"
+              className={`${splitPaneFooterBaseClass} flex w-full flex-wrap items-center gap-x-3 gap-y-2 text-[#111]/60 sm:flex-nowrap sm:gap-4`}
             >
               <button
                 type="button"
@@ -1033,10 +1042,7 @@ export default function Portfolio() {
                 </span>
                 <span className="underline-offset-2 group-hover:underline">Shuffle</span>
               </button>
-              <span aria-hidden="true" className="hidden sm:inline-block text-[#111]/45">
-                ·
-              </span>
-              <div className="text-left text-[#111]/55 sm:text-right">
+              <div className="min-w-0 flex-1 text-left text-[#111]/55">
                 Want to add a new project to my display?{" "}
                 <a
                   href="mailto:ayukoene@gmail.com"
@@ -1053,7 +1059,7 @@ export default function Portfolio() {
         <div
           className={
             isHorizontalLayout
-              ? "flex min-w-0 flex-1 basis-1/2 max-w-1/2 shrink-0 grow-0 flex-col border-l border-[#111]/10 py-10 pl-12 pr-12"
+              ? `flex min-w-0 flex-1 basis-1/2 max-w-1/2 shrink-0 grow-0 flex-col border-l border-[#111]/10 ${splitPaneDesktopTabletPaddingClass}`
               : "flex min-w-0 flex-col border-t border-[#111]/10 px-5 pb-8 pt-8"
           }
         >
@@ -1115,8 +1121,26 @@ export default function Portfolio() {
                   {activeTile.id === "brnd" ? (
                     <DetailSection marker={<PlusBadge />} title="Recent builds">
                       <div className={detailBodyClass}>
-                        <div>Website refresh</div>
-                        <div>23plusone happiness scan + research dashboard platform</div>
+                        <div>
+                          <a
+                            href="https://br-ndpeople.com"
+                            target="_blank"
+                            rel="noreferrer"
+                            className={detailLinkClass}
+                          >
+                            Website refresh
+                          </a>
+                        </div>
+                        <div>
+                          <a
+                            href="https://www.br-ndpeople.com/whats-new/23plusone-happiness-scan"
+                            target="_blank"
+                            rel="noreferrer"
+                            className={detailLinkClass}
+                          >
+                            23plusone happiness scan + research dashboard platform
+                          </a>
+                        </div>
                         <div>Credits: Sinyo Koene | Software Engineer · Data Analyst</div>
                       </div>
                     </DetailSection>
@@ -1130,7 +1154,7 @@ export default function Portfolio() {
                           rel="noreferrer"
                           className={detailLinkClass}
                         >
-                          Victor Jimoh
+                          Victor Jimoh · UX/UI Design
                         </a>
                       </div>
                     </DetailSection>
@@ -1139,25 +1163,23 @@ export default function Portfolio() {
                     <DetailSection marker={<PlusBadge />} title="Credits">
                       <div className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
                         <div>
-                          Mehmet Bostanci ·{" "}
                           <a
-                            href="https://thingscon.org"
+                            href="https://mehmetberkbostanci.com/"
                             target="_blank"
                             rel="noreferrer"
                             className={detailLinkClass}
                           >
-                            TH/NGScon
+                            Mehmet Bostanci · Head Engineer
                           </a>
                         </div>
                         <div>
-                          Dani Klein ·{" "}
                           <a
-                            href="https://ddw.nl"
+                            href="https://www.danielklein.design/"
                             target="_blank"
                             rel="noreferrer"
                             className={detailLinkClass}
                           >
-                            Dutch Design Week
+                            Dani Klein · Program Lead
                           </a>
                         </div>
                       </div>
@@ -1165,10 +1187,21 @@ export default function Portfolio() {
                   ) : null}
                   {activeTile.id === "tiny" ? (
                     <DetailSection marker={<PlusBadge />} title="Credits">
-                      <div className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
-                        <div>Stefan David von Franquemont · 3D Artist</div>
-                        <div>Sinyo Koene · Software Engineer</div>
-                        <div>Luz David von Franquemont · Storytelling</div>
+                      <div className="mt-1 flex h-full min-h-[220px] flex-col text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]">
+                        <div className="space-y-1">
+                          <div>Stefan David von Franquemont · 3D Artist</div>
+                          <div>Sinyo Koene · Software Engineer</div>
+                          <div>Luz David von Franquemont · Storytelling</div>
+                        </div>
+                        <div className="mt-auto flex justify-end pt-2">
+                          <Image
+                            src="/images/Solol_Ladybug_Red.png"
+                            alt="Solol Ladybug Red"
+                            width={420}
+                            height={320}
+                            className="h-auto w-full max-w-[180px]"
+                          />
+                        </div>
                       </div>
                     </DetailSection>
                   ) : null}
@@ -1199,7 +1232,7 @@ export default function Portfolio() {
             data-entrance
             className={
               isHorizontalLayout
-                ? "mt-auto pt-8 text-[14px] text-[#111]/55 sm:text-[12px]"
+                ? `${splitPaneFooterBaseClass} text-[#111]/55`
                 : "mt-8 pt-0 text-[14px] text-[#111]/55 sm:text-[12px]"
             }
           >
@@ -1224,6 +1257,15 @@ export default function Portfolio() {
                     rel="noreferrer"
                   >
                     Linkedin
+                  </a>{" "}
+                  ·{" "}
+                  <a
+                    className={detailLinkClass}
+                    href="https://www.instagram.com/ayukoene?igsh=YWxpdG5tZHZ5MjA0&utm_source=qr"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Instagram
                   </a>
                 </span>
               </div>

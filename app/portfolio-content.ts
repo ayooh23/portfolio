@@ -17,6 +17,9 @@ export type Project = {
 export const LOADER_TYPE_TEXT = "Hello! How Ayu?";
 export const LOADER_SUBLINE_TEXT = "Slide through my projects...";
 export const ACTIVE_CELL_HINT_TEXT = "Drag here to learn more.";
+export const DMS_RESEARCH_PAPER_PDF =
+  "/documents/Evaluating_High-tech_Decision-making_Strategies_AyuKoene.pdf";
+export const OLVG_RESEARCH_PAPER_PDF = "/documents/MDD-RR-S2-AyuKoene.pdf";
 
 export const LOADING_GALLERY = [
   "/images/ayu03.jpg",
@@ -40,7 +43,7 @@ export const PROJECTS: Project[] = [
       "Contributing to BR-ND People's own brand across visual identity, materials, and digital touchpoints.",
     ],
     thumb: "/images/thumb_br-ndpeople.jpg",
-    links: [{ label: "Open", href: "https://br-ndpeople.com" }],
+    links: [{ label: "Visit website", href: "https://br-ndpeople.com" }],
   },
   {
     id: "do",
@@ -55,9 +58,12 @@ export const PROJECTS: Project[] = [
     ],
     thumb: "/images/thumb_do.jpg",
     links: [
-      { label: "Read article", href: "#do-article" },
-      { label: "Watch Trailer", href: "#do-trailer" },
-      { label: "Download Research Paper", href: "#do-research-paper" },
+      {
+        label: "Read article",
+        href: "https://www.hva.nl/nieuws/2025/5/studenten-master-digital-design-ontwikkelen-database-om-arts-te-helpen-bij-doorverwijzing-dak--en-thuislozen",
+      },
+      { label: "Watch Trailer", href: "https://youtu.be/K2KjvjNbcvQ" },
+      { label: "Download Research Paper", href: OLVG_RESEARCH_PAPER_PDF },
     ],
   },
   {
@@ -72,7 +78,11 @@ export const PROJECTS: Project[] = [
       "Ran rapid validation cycles to figure out what works, learning by building and testing rather than theorizing.",
     ],
     thumb: "/images/thumb_stroll.jpg",
-    links: [{ label: "Open", href: "/stroll" }],
+    links: [
+      { label: "Read case", href: "https://www.masterdigitaldesign.com/case/stroll" },
+      { label: "TH/NGScon", href: "https://thingscon.org" },
+      { label: "Dutch Design Week", href: "https://site.ddw.nl/en/programme/15121/stroll" },
+    ],
   },
   {
     id: "dms",
@@ -86,7 +96,7 @@ export const PROJECTS: Project[] = [
       "Translated findings into insights about how technical teams navigate uncertainty when stakes are high and information is incomplete, working between design research and engineering rigor.",
     ],
     thumb: "/images/thumb_dms.png",
-    links: [{ label: "Download Research Paper", href: "#dms" }],
+    links: [{ label: "Download Research Paper", href: DMS_RESEARCH_PAPER_PDF }],
   },
   {
     id: "tiny",
@@ -100,7 +110,7 @@ export const PROJECTS: Project[] = [
       "Learned what it actually takes to build and ship a product from zero, including legal structures, finances, and keeping a small team aligned when everyone is doing different things.",
     ],
     thumb: "/images/thumb_tiny.jpeg",
-    links: [{ label: "Open", href: "#tiny" }],
+    links: [],
   },
 ];
 

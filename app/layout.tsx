@@ -84,7 +84,10 @@ export default function RootLayout({
         url: siteUrl,
         image: `${siteUrl}/images/ayu.jpg`,
         jobTitle: "Strategic Designer",
-        sameAs: ["https://nl.linkedin.com/in/ayu-koene-55b63718a"],
+        sameAs: [
+          "https://nl.linkedin.com/in/ayu-koene-55b63718a",
+          "https://www.instagram.com/ayukoene?igsh=YWxpdG5tZHZ5MjA0&utm_source=qr",
+        ],
       },
       {
         "@type": "WebSite",
