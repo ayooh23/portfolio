@@ -345,6 +345,43 @@
     }
 }
 
+/* Restore a consistent keyboard-visible focus indicator after the global outline reset. */
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+    outline: 2px solid #111;
+    outline-offset: 2px;
+}
+
+/* Keep skip link hidden for sighted users until keyboard focus reaches it. */
+.skip-link {
+    position: absolute;
+    top: .5rem;
+    left: .5rem;
+    z-index: 200;
+    clip: rect(0,0,0,0);
+    clip-path: inset(50%);
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: .5rem .75rem;
+    border: 1px solid #111;
+    border-radius: .25rem;
+    background: #fff;
+    color: #111;
+    text-decoration: none;
+}
+
+.skip-link:focus-visible {
+    clip: auto;
+    clip-path: none;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    white-space: normal;
+}
+
 @media (pointer: fine) {
     .custom-cursor-scope,
     .custom-cursor-scope * {

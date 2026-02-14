@@ -104,6 +104,9 @@ export default function RootLayout({
         className={`${inter.className} min-h-screen antialiased flex flex-col bg-theme text-gray-900 dark:text-white`}
         data-theme="light"
       >
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
