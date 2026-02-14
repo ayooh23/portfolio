@@ -526,6 +526,7 @@ export default function Portfolio() {
     tiles.forEach((t, i) => (initial[t.id] = order[i]));
     return initial;
   });
+  const [hasTileInteracted, setHasTileInteracted] = useState(false);
   const profileTileIndex = tilePos[ayuTile.id];
 
   useEffect(() => {
@@ -774,6 +775,7 @@ export default function Portfolio() {
   });
 
   const onTilePointerDown = (tile: Project) => (e: React.PointerEvent) => {
+    setHasTileInteracted(true);
     const el = tileRefs.current[tile.id];
     if (!el) return;
 
@@ -1070,7 +1072,9 @@ export default function Portfolio() {
                     <div
                       key={`empty-${idx}`}
                       data-pre-tile-cell
-                      className="absolute rounded-[10px] border-[1.25px] border-[#cdcdcd] bg-transparent"
+                        className={`absolute rounded-[10px] border-[1.25px] border-[#cdcdcd] bg-transparent ${
+                          hasTileInteracted ? "" : "active-cell-pre-interaction-blink"
+                        }`}
                       style={{
                         width: cell,
                         height: cell,
@@ -1113,6 +1117,7 @@ export default function Portfolio() {
                           isActive
                             ? "z-10 rounded-[10px] bg-[#f3f3f3] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
                             : "rounded-[10px] bg-[#f3f3f3]",
+                          !hasTileInteracted && isActive ? "active-cell-pre-interaction-blink" : "",
                           "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
                           "transition-opacity duration-200",
                         ].join(" ")}
