@@ -1426,7 +1426,9 @@ function PortfolioContent() {
                             23plusone happiness scan + research dashboard platform
                           </a>
                         </div>
-                        <div role="listitem">Credits: Sinyo Koene | Software Engineer · Data Analyst</div>
+                        <div role="listitem">
+                          Credits:  Built with Sinyo Koene (Software Engineer · Data Analyst) Next.js, GSAP, and AI collaboration. 
+                        </div>
                       </div>
                     </DetailSection>
                   ) : null}
