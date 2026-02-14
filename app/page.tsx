@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import {
   ACTIVE_CELL_HINT_TEXT,
@@ -114,7 +114,7 @@ function DetailSection({
   );
 }
 
-export default function Portfolio() {
+function PortfolioContent() {
   const searchParams = useSearchParams();
   const tiles = TILES;
   const requestedTileId = searchParams.get("tile");
@@ -1576,5 +1576,13 @@ export default function Portfolio() {
         </section>
       </div>
     </main>
+  );
+}
+
+export default function Portfolio() {
+  return (
+    <Suspense fallback={null}>
+      <PortfolioContent />
+    </Suspense>
   );
 }

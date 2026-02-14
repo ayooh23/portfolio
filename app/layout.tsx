@@ -14,6 +14,7 @@ const siteUrl = getSiteUrl();
 const siteName = "Ayu Koene";
 const siteDescription =
   "Strategic designer with a background in mechanical engineering, digital design, and brand strategy.";
+const socialImagePath = "/images/ayu-banner.jpg";
 const indexingEnabled = isProductionIndexingEnabled();
 
 export const metadata: Metadata = {
@@ -24,6 +25,16 @@ export const metadata: Metadata = {
   },
   description: siteDescription,
   applicationName: siteName,
+  referrer: "origin-when-cross-origin",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  authors: [{ name: siteName, url: siteUrl }],
+  creator: siteName,
+  publisher: siteName,
+  manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "/",
   },
@@ -41,12 +52,13 @@ export const metadata: Metadata = {
     title: `${siteName} | Strategic Designer`,
     description: siteDescription,
     siteName,
+    locale: "en_US",
     images: [
       {
-        url: "/Fav_AYOOH.jpg",
+        url: socialImagePath,
         width: 1200,
         height: 630,
-        alt: "Portrait of Ayu Koene",
+        alt: `${siteName} portfolio preview image`,
       },
     ],
   },
@@ -54,7 +66,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${siteName} | Strategic Designer`,
     description: siteDescription,
-    images: ["/Fav_AYOOH.jpg"],
+    images: [socialImagePath],
   },
   icons: {
     icon: "/fav_ayooh.png",
@@ -85,20 +97,37 @@ export default function RootLayout({
     "@graph": [
       {
         "@type": "Person",
+        "@id": `${siteUrl}/#person`,
         name: "Ayu Koene",
         url: siteUrl,
         image: `${siteUrl}/images/ayu.jpg`,
+        description: siteDescription,
         jobTitle: "Strategic Designer",
         sameAs: [
           "https://nl.linkedin.com/in/ayu-koene-55b63718a",
-          "https://www.instagram.com/ayukoene?igsh=YWxpdG5tZHZ5MjA0&utm_source=qr",
+          "https://www.instagram.com/ayukoene",
         ],
       },
       {
         "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
         name: siteName,
         url: siteUrl,
+        description: siteDescription,
         inLanguage: "en",
+      },
+      {
+        "@type": "WebPage",
+        "@id": `${siteUrl}/#webpage`,
+        name: `${siteName} | Strategic Designer`,
+        url: siteUrl,
+        description: siteDescription,
+        isPartOf: { "@id": `${siteUrl}/#website` },
+        about: { "@id": `${siteUrl}/#person` },
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: `${siteUrl}${socialImagePath}`,
+        },
       },
     ],
   };
