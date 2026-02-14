@@ -12,7 +12,12 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       return;
     }
 
-    import("lenis").then(({ default: Lenis }) => {
+    let isUnmounted = false;
+    let cleanup: (() => void) | undefined;
+
+    void import("lenis").then(({ default: Lenis }) => {
+      if (isUnmounted) return;
+
       const lenis = new Lenis({
         duration: 1.2,
         easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -27,12 +32,19 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       }
       rafRef.current = requestAnimationFrame(raf);
 
-      return () => {
+      cleanup = () => {
         cancelAnimationFrame(rafRef.current);
         lenis.destroy();
         lenisRef.current = null;
+        rafRef.current = 0;
       };
     });
+
+    return () => {
+      isUnmounted = true;
+      cleanup?.();
+      cleanup = undefined;
+    };
   }, []);
 
   return <>{children}</>;

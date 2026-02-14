@@ -44,21 +44,21 @@
 
 @keyframes active-cell-attention {
     0% {
-        outline-width: 1.1px;
+        outline-width: 1.0px;
         outline-color: rgba(17,17,17,.18);
-        box-shadow: 0 0 0 1.1px rgba(17,17,17,.1), inset 0 1px 0 rgba(255,255,255,.66)
+        box-shadow: 0 0 0 1.0px rgba(17,17,17,.1), inset 0 1px 0 rgba(255,255,255,.66)
     }
 
     50% {
-        outline-width: 2.2px;
+        outline-width: 2.0px;
         outline-color: rgba(17,17,17,.27);
-        box-shadow: 0 0 0 2.15px rgba(17,17,17,.18), inset 0 1px 0 rgba(255,255,255,.8)
+        box-shadow: 0 0 0 2.10px rgba(17,17,17,.18), inset 0 1px 0 rgba(255,255,255,.8)
     }
 
     100% {
-        outline-width: 1.1px;
+        outline-width: 1.0px;
         outline-color: rgba(17,17,17,.18);
-        box-shadow: 0 0 0 1.1px rgba(17,17,17,.1), inset 0 1px 0 rgba(255,255,255,.66)
+        box-shadow: 0 0 0 1.0px rgba(17,17,17,.1), inset 0 1px 0 rgba(255,255,255,.66)
     }
 }
 

@@ -69,8 +69,6 @@ const splitPaneDesktopTabletPaddingClass = "py-10 px-12";
 const splitPaneHeaderClass = `${detailRowClass} items-center text-[15px] font-medium text-[#111]/80 sm:text-[12px]`;
 const splitPaneFooterBaseClass = "mt-4 min-h-[36px] text-[14px] leading-[1.75] sm:mt-3 sm:text-[12px]";
 const LOADER_SEEN_SESSION_KEY = "ayu-portfolio-loader-seen";
-// const ACTIVE_TILE_SEQUENCE_INTERVAL_MS = 3800;
-// const ACTIVE_TILE_TRANSITION_DURATION_S = 0.28;
 
 function PlusBadge() {
   return (
@@ -117,7 +115,6 @@ export default function Portfolio() {
   const loaderOverlayRef = useRef<HTMLDivElement | null>(null);
   const loaderContentRef = useRef<HTMLDivElement | null>(null);
   const loaderImageFrameRef = useRef<HTMLDivElement | null>(null);
-  // const activeTileImageFrameRef = useRef<HTMLDivElement | null>(null);
   const loaderCursorRef = useRef<HTMLSpanElement | null>(null);
   const loaderSublineCursorRef = useRef<HTMLSpanElement | null>(null);
   const loaderTypeCharsRef = useRef(0);
@@ -128,7 +125,6 @@ export default function Portfolio() {
   const [loaderTypeChars, setLoaderTypeChars] = useState(0);
   const [loaderSublineChars, setLoaderSublineChars] = useState(0);
   const [loaderImageIndex, setLoaderImageIndex] = useState(0);
-  // const [activeTileImageIndex, setActiveTileImageIndex] = useState(0);
 
   // puzzle refs
   const boardRef = useRef<HTMLDivElement | null>(null);
@@ -149,7 +145,10 @@ export default function Portfolio() {
   useEffect(() => {
     const el = boardWrapperRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(() => setBoardContainerWidth(el.offsetWidth));
+    const ro = new ResizeObserver(() => {
+      const nextWidth = el.offsetWidth;
+      setBoardContainerWidth((prevWidth) => (prevWidth === nextWidth ? prevWidth : nextWidth));
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -614,61 +613,11 @@ export default function Portfolio() {
     }
     return null;
   }, [tiles, tilePos, activeCellIndex]);
-
-  // const activeTileGallery = useMemo(() => {
-  //   if (!activeTile) return [];
-  //   const sequence = PROJECT_IMAGE_SEQUENCES[activeTile.id];
-  //   if (!sequence || sequence.length === 0) return [activeTile.thumb];
-  //   return sequence;
-  // }, [activeTile]);
   const nonProfileCellIndices = useMemo(
     () =>
       Array.from({ length: totalCells }, (_, idx) => idx).filter((idx) => idx !== profileTileIndex),
     [profileTileIndex, totalCells]
   );
-
-  // Image sequence on active cell is temporarily disabled.
-  // useEffect(() => {
-  //   if (activeTileGallery.length <= 1 || isLoading) return;
-  //
-  //   const resetRafId = window.requestAnimationFrame(() => {
-  //     setActiveTileImageIndex(0);
-  //   });
-  //   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-  //   if (reduce) {
-  //     return () => window.cancelAnimationFrame(resetRafId);
-  //   }
-  //
-  //   const intervalId = window.setInterval(() => {
-  //     setActiveTileImageIndex((prev) => (prev + 1) % activeTileGallery.length);
-  //   }, ACTIVE_TILE_SEQUENCE_INTERVAL_MS);
-  //
-  //   return () => {
-  //     window.cancelAnimationFrame(resetRafId);
-  //     window.clearInterval(intervalId);
-  //   };
-  // }, [activeTile?.id, activeTileGallery.length, isLoading]);
-  //
-  // useEffect(() => {
-  //   if (activeTileGallery.length <= 1 || isLoading) return;
-  //
-  //   const frame = activeTileImageFrameRef.current;
-  //   if (!frame) return;
-  //
-  //   const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-  //   if (reduce) return;
-  //
-  //   gsap.fromTo(
-  //     frame,
-  //     { autoAlpha: 0.86 },
-  //     {
-  //       autoAlpha: 1,
-  //       duration: ACTIVE_TILE_TRANSITION_DURATION_S,
-  //       ease: "power2.out",
-  //       overwrite: "auto",
-  //     }
-  //   );
-  // }, [activeTile?.id, activeTileGallery.length, activeTileImageIndex, isLoading]);
 
   // keep mobile in document flow; lock to horizontal split on tablet/desktop
   useEffect(() => {
@@ -1051,55 +1000,58 @@ export default function Portfolio() {
                   aria-label="Sliding puzzle"
                 >
                   {/* Grey base cells for all non-profile positions */}
-                  {nonProfileCellIndices.map((idx) => (
-                    <div
-                      key={`base-${idx}`}
-                      data-pre-tile-cell
-                      className="absolute rounded-[10px] border border-[#ededed] bg-transparent"
-                      style={{
-                        width: cell,
-                        height: cell,
-                        left: cellXY(idx, grid.cols, cell, gap).x,
-                        top: cellXY(idx, grid.cols, cell, gap).y,
-                      }}
-                    />
-                  ))}
+                  {nonProfileCellIndices.map((idx) => {
+                    const position = cellXY(idx, grid.cols, cell, gap);
+                    return (
+                      <div
+                        key={`base-${idx}`}
+                        data-pre-tile-cell
+                        className="absolute rounded-[10px] border border-[#ededed] bg-transparent"
+                        style={{
+                          width: cell,
+                          height: cell,
+                          left: position.x,
+                          top: position.y,
+                        }}
+                      />
+                    );
+                  })}
 
                   {/* Active empty cell indicator */}
                   {currentEmptyIndices
                     .filter((idx) => idx === activeCellIndex)
-                    .map((idx) => (
-                    <div
-                      key={`empty-${idx}`}
-                      data-pre-tile-cell
+                    .map((idx) => {
+                      const position = cellXY(idx, grid.cols, cell, gap);
+                      return (
+                      <div
+                        key={`empty-${idx}`}
+                        data-pre-tile-cell
                         className={`absolute rounded-[10px] border-[1.25px] border-[#cdcdcd] bg-transparent ${
                           hasTileInteracted ? "" : "active-cell-pre-interaction-blink"
                         }`}
-                      style={{
-                        width: cell,
-                        height: cell,
-                        left: cellXY(idx, grid.cols, cell, gap).x,
-                        top: cellXY(idx, grid.cols, cell, gap).y,
-                      }}
-                    >
+                        style={{
+                          width: cell,
+                          height: cell,
+                          left: position.x,
+                          top: position.y,
+                        }}
+                      >
                       <div
                         data-active-descriptor
-                        className="flex h-full w-full items-center justify-center p-1 text-center whitespace-pre-line text-[14px] font-normal leading-[1.35] text-[#111]/60 sm:p-4 sm:text-[12px]"
+                        className={`flex h-full w-full items-center justify-center p-1 text-center whitespace-pre-line text-[14px] font-normal leading-[1.35] ${
+                          hasTileInteracted ? "text-[#111]/42" : "text-[#111]/60"
+                        } sm:p-4 sm:text-[12px]`}
                       >
                         <span>{activeCellHintText}</span>
                       </div>
-                    </div>
-                  ))}
+                      </div>
+                    );
+                    })}
 
                   {/* Tiles */}
                   {tiles.map((tile) => {
                     const from = tilePos[tile.id];
                     const isActive = from === activeCellIndex;
-                    // const shouldSwapImage =
-                    //   isActive && activeTile?.id === tile.id && activeTileGallery.length > 1;
-                    // const tileImageSrc = shouldSwapImage
-                    //   ? activeTileGallery[activeTileImageIndex % activeTileGallery.length]
-                    //   : tile.thumb;
                     const tileImageSrc = tile.thumb;
                     const touchAction = getTileTouchAction(from, currentEmptyIndices, grid.cols);
                     return (
@@ -1124,10 +1076,7 @@ export default function Portfolio() {
                         style={{ width: cell, height: cell, touchAction }}
                         aria-label={`Tile: ${tile.title}`}
                       >
-                        <div
-                          // ref={shouldSwapImage ? activeTileImageFrameRef : undefined}
-                          className="relative h-full w-full"
-                        >
+                        <div className="relative h-full w-full">
                           <Image
                             src={tileImageSrc}
                             alt={tile.title}

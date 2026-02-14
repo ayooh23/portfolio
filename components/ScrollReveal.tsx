@@ -55,6 +55,7 @@ export default function ScrollReveal({
   direction = "up",
   delay = 0,
   threshold = 0.1,
+  once = true,
   distance = "2rem",
   scale = 0.95,
   className,
@@ -76,9 +77,14 @@ export default function ScrollReveal({
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          timeoutId = setTimeout(() => setVisible(true), delay);
-          io.unobserve(entry.target);
+          if (entry.isIntersecting) {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => setVisible(true), delay);
+            if (once) io.unobserve(entry.target);
+            return;
+          }
+
+          if (!once) setVisible(false);
         });
       },
       { threshold }
@@ -88,7 +94,7 @@ export default function ScrollReveal({
       io.disconnect();
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [delay, threshold, reduceMotion]);
+  }, [delay, once, threshold, reduceMotion]);
 
   const style = reduceMotion || visible
     ? getStyles(direction, distance, scale, true)
