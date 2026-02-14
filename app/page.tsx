@@ -137,6 +137,7 @@ export default function Portfolio() {
   const totalCells = grid.cols * grid.rows; // 9
   const activeCellIndex = 2; // top-right = active tile
   const splitLayoutBreakpoint = 768;
+  const desktopViewportCap = { width: 1440, height: 900 };
   const [isHorizontalLayout, setIsHorizontalLayout] = useState(false);
 
   // Board fills first-half width; cell/gap derived from measured container
@@ -211,6 +212,7 @@ export default function Portfolio() {
   useEffect(() => {
     const overlayEl = loaderOverlayRef.current;
     const contentEl = loaderContentRef.current;
+    const frameEl = loaderImageFrameRef.current;
     const rootEl = rootRef.current;
     if (!overlayEl || !contentEl || !rootEl) return;
 
@@ -237,6 +239,14 @@ export default function Portfolio() {
       scale: 1.085,
       transformOrigin: "50% 50%",
     });
+    if (frameEl) {
+      gsap.set(frameEl, {
+        autoAlpha: 0,
+        yPercent: 2.2,
+        scale: 0.985,
+        transformOrigin: "50% 50%",
+      });
+    }
     gsap.set(activeDescriptorEl, { autoAlpha: 0, yPercent: 1.2 });
 
     let hasSeenLoader = false;
@@ -262,6 +272,7 @@ export default function Portfolio() {
           guideFinalPauseDuration: 0.03,
           holdDuration: 0.06,
           contentInDuration: 0.36,
+          loaderFrameInDuration: 0.44,
           contentOutDuration: 0.24,
           overlayOutDuration: 0.3,
           entranceDuration: 0.52,
@@ -280,6 +291,7 @@ export default function Portfolio() {
           guideFinalPauseDuration: 0.2,
           holdDuration: 0.68,
           contentInDuration: 0.74,
+          loaderFrameInDuration: 0.66,
           contentOutDuration: 0.46,
           overlayOutDuration: 0.58,
           entranceDuration: 0.9,
@@ -309,10 +321,32 @@ export default function Portfolio() {
     };
 
     const tl = gsap.timeline();
+    if (frameEl) {
+      tl.to(
+        frameEl,
+        {
+          autoAlpha: 1,
+          yPercent: 0,
+          scale: 1,
+          duration: timing.loaderFrameInDuration,
+          ease: "power2.out",
+          overwrite: "auto",
+        },
+        0.02
+      );
+    }
     tl.fromTo(
       contentEl,
-      { autoAlpha: 0, x: -10 },
-      { autoAlpha: 1, x: 0, duration: timing.contentInDuration, ease: "sine.out" }
+      { autoAlpha: 0, x: -14, y: 6, filter: "blur(2px)" },
+      {
+        autoAlpha: 1,
+        x: 0,
+        y: 0,
+        filter: "blur(0px)",
+        duration: timing.contentInDuration,
+        ease: "power2.out",
+        clearProps: "filter",
+      }
     );
     tl.to(
       typeState,
@@ -429,6 +463,18 @@ export default function Portfolio() {
       },
       "<0.18"
     );
+    if (frameEl) {
+      tl.to(
+        frameEl,
+        {
+          autoAlpha: 0,
+          duration: Math.min(0.18, timing.dropTileDuration * 0.75),
+          ease: "sine.out",
+          overwrite: "auto",
+        },
+        "<"
+      );
+    }
     tl.to(
       dropTileEls,
       {
@@ -500,24 +546,6 @@ export default function Portfolio() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!isLoading) return;
-
-    const frame = loaderImageFrameRef.current;
-    if (!frame) return;
-
-    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
-    if (reduce) return;
-
-    gsap.to(frame, {
-      autoAlpha: 1,
-      duration: 0.24,
-      ease: "sine.out",
-      overwrite: "auto",
-      startAt: { autoAlpha: 0.96 },
-    });
-  }, [loaderImageIndex, isLoading]);
-
   // puzzle state: tile -> cellIndex (6 tiles; 3 cells empty at 2,4,6)
   const [tilePos, setTilePos] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
@@ -525,7 +553,7 @@ export default function Portfolio() {
     tiles.forEach((t, i) => (initial[t.id] = order[i]));
     return initial;
   });
-  const [hasTileInteracted, setHasTileInteracted] = useState(false);
+  const [hasTileEnteredActiveCell, setHasTileEnteredActiveCell] = useState(false);
   const profileTileIndex = tilePos[ayuTile.id];
 
   useEffect(() => {
@@ -724,7 +752,6 @@ export default function Portfolio() {
   });
 
   const onTilePointerDown = (tile: Project) => (e: React.PointerEvent) => {
-    setHasTileInteracted(true);
     const el = tileRefs.current[tile.id];
     if (!el) return;
 
@@ -839,6 +866,9 @@ export default function Portfolio() {
       shouldSwap = travel > st.max * 0.3;
 
       if (shouldSwap) {
+        if (targetIndex === activeCellIndex) {
+          setHasTileEnteredActiveCell(true);
+        }
         setTilePos((prev) => ({ ...prev, [id]: targetIndex }));
       }
     }
@@ -872,6 +902,9 @@ export default function Portfolio() {
     }
     const next: Record<string, number> = {};
     tiles.forEach((t, i) => (next[t.id] = indices[i]));
+    if (Object.values(next).includes(activeCellIndex)) {
+      setHasTileEnteredActiveCell(true);
+    }
     setTilePos(next);
   };
 
@@ -879,7 +912,7 @@ export default function Portfolio() {
     <main
       ref={rootRef}
       className={`min-h-screen w-full overflow-x-hidden bg-white text-[#111]${
-        isHorizontalLayout ? " h-screen w-screen overflow-hidden" : ""
+        isHorizontalLayout ? " flex h-screen w-screen items-center justify-center overflow-hidden" : ""
       }${isFinePointer ? " custom-cursor-scope" : ""}`}
     >
       {isFinePointer ? (
@@ -928,7 +961,7 @@ export default function Portfolio() {
           </div>
           <div
             ref={loaderImageFrameRef}
-            className="fixed z-[121] overflow-hidden rounded-[10px] bg-[#f3f3f3]"
+            className="safari-transition-rounded fixed z-[121] overflow-hidden rounded-[10px] bg-[#f3f3f3]"
             style={{ width: cell, height: cell, opacity: 0 }}
           >
             <Image
@@ -949,8 +982,18 @@ export default function Portfolio() {
       <div
         className={
           isHorizontalLayout
-            ? "flex h-full min-h-0 flex-row flex-nowrap"
+            ? "flex min-h-0 flex-row flex-nowrap"
             : "flex min-h-screen flex-col"
+        }
+        style={
+          isHorizontalLayout
+            ? {
+                width: "100vw",
+                height: "100vh",
+                maxWidth: `${desktopViewportCap.width}px`,
+                maxHeight: `${desktopViewportCap.height}px`,
+              }
+            : undefined
         }
       >
         {/* Left half: puzzle full height; right padding matches second half left */}
@@ -1027,7 +1070,7 @@ export default function Portfolio() {
                         key={`empty-${idx}`}
                         data-pre-tile-cell
                         className={`absolute rounded-[10px] border-[1.25px] border-[#cdcdcd] bg-transparent ${
-                          hasTileInteracted ? "" : "active-cell-pre-interaction-blink"
+                          hasTileEnteredActiveCell ? "" : "active-cell-pre-interaction-blink"
                         }`}
                         style={{
                           width: cell,
@@ -1039,7 +1082,7 @@ export default function Portfolio() {
                       <div
                         data-active-descriptor
                         className={`flex h-full w-full items-center justify-center p-1 text-center whitespace-pre-line text-[14px] font-normal leading-[1.35] ${
-                          hasTileInteracted ? "text-[#111]/42" : "text-[#111]/60"
+                          hasTileEnteredActiveCell ? "text-[#111]/42" : "text-[#111]/60"
                         } sm:p-4 sm:text-[12px]`}
                       >
                         <span>{activeCellHintText}</span>
@@ -1052,24 +1095,25 @@ export default function Portfolio() {
                   {tiles.map((tile) => {
                     const from = tilePos[tile.id];
                     const isActive = from === activeCellIndex;
+                    const isProfileTile = tile.id === ayuTile.id;
                     const tileImageSrc = tile.thumb;
                     const touchAction = getTileTouchAction(from, currentEmptyIndices, grid.cols);
                     return (
                       <button
                         key={tile.id}
                         data-tile
-                        data-tile-drop={tile.id === ayuTile.id ? undefined : "true"}
+                        data-tile-drop="true"
                         ref={(node) => {
                           tileRefs.current[tile.id] = node;
                         }}
                         type="button"
                         onPointerDown={onTilePointerDown(tile)}
                         className={[
-                          "absolute left-0 top-0 overflow-hidden",
+                          "safari-transition-rounded absolute left-0 top-0 overflow-hidden",
                           isActive
                             ? "z-10 rounded-[10px] bg-[#f3f3f3] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
                             : "rounded-[10px] bg-[#f3f3f3]",
-                          !hasTileInteracted && isActive ? "active-cell-pre-interaction-blink" : "",
+                          !hasTileEnteredActiveCell && isActive ? "active-cell-pre-interaction-blink" : "",
                           "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
                           "transition-opacity duration-200",
                         ].join(" ")}
@@ -1082,7 +1126,8 @@ export default function Portfolio() {
                             alt={tile.title}
                             fill
                             sizes={`${Math.max(120, Math.round(cell))}px`}
-                            className="object-cover"
+                            className="safari-loading-fix object-cover"
+                            priority={isProfileTile}
                             draggable={false}
                           />
                         </div>
