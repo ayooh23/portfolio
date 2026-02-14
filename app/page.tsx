@@ -1556,7 +1556,7 @@ function PortfolioContent() {
                   ·{" "}
                   <a
                     className={detailLinkClass}
-                    href="https://nl.linkedin.com/in/ayu-koene-55b63718a"
+                    href="https://www.linkedin.com/in/ayukoene/"
                     target="_blank"
                     rel="noreferrer"
                   >

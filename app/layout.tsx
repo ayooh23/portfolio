@@ -104,7 +104,7 @@ export default function RootLayout({
         description: siteDescription,
         jobTitle: "Strategic Designer",
         sameAs: [
-          "https://nl.linkedin.com/in/ayu-koene-55b63718a",
+          "https://www.linkedin.com/in/ayukoene/",
           "https://www.instagram.com/ayukoene",
         ],
       },
