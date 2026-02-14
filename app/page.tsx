@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import {
@@ -114,7 +115,9 @@ function DetailSection({
 }
 
 export default function Portfolio() {
+  const searchParams = useSearchParams();
   const tiles = TILES;
+  const requestedTileId = searchParams.get("tile");
   const loadingGallery = LOADING_GALLERY;
   const loaderTypeText = LOADER_TYPE_TEXT;
   const loaderSublineText = LOADER_SUBLINE_TEXT;
@@ -566,9 +569,25 @@ export default function Portfolio() {
     const initial: Record<string, number> = {};
     const order = [4, 8, 7, 3, 6, 0]; // empties at top-middle, top-right, middle-right
     tiles.forEach((t, i) => (initial[t.id] = order[i]));
+
+    if (!requestedTileId) return initial;
+
+    const requestedTile = tiles.find((tile) => tile.id === requestedTileId);
+    if (!requestedTile) return initial;
+
+    const requestedTileIndex = initial[requestedTile.id];
+    if (requestedTileIndex === activeCellIndex) return initial;
+
+    const tileAtActiveCell = tiles.find((tile) => initial[tile.id] === activeCellIndex);
+    initial[requestedTile.id] = activeCellIndex;
+    if (tileAtActiveCell) {
+      initial[tileAtActiveCell.id] = requestedTileIndex;
+    }
     return initial;
   });
-  const [hasTileEnteredActiveCell, setHasTileEnteredActiveCell] = useState(false);
+  const [hasTileEnteredActiveCell, setHasTileEnteredActiveCell] = useState(() =>
+    Boolean(requestedTileId && tiles.some((tile) => tile.id === requestedTileId))
+  );
   const profileTileIndex = tilePos[ayuTile.id];
 
   useEffect(() => {

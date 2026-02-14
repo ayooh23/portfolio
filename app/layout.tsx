@@ -56,6 +56,11 @@ export const metadata: Metadata = {
     description: siteDescription,
     images: ["/Fav_AYOOH.jpg"],
   },
+  icons: {
+    icon: "/fav_ayooh.png",
+    shortcut: "/fav_ayooh.png",
+    apple: "/fav_ayooh.png",
+  },
   robots: {
     index: indexingEnabled,
     follow: indexingEnabled,
