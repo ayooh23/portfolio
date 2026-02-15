@@ -20,8 +20,8 @@ const indexingEnabled = isProductionIndexingEnabled();
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${siteName} | Strategic Designer`,
-    template: `%s | ${siteName}`,
+    default: `${siteName} · Strategic Designer`,
+    template: `%s · ${siteName}`,
   },
   description: siteDescription,
   applicationName: siteName,
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "/",
-    title: `${siteName} | Strategic Designer`,
+    title: `${siteName} · Strategic Designer`,
     description: siteDescription,
     siteName,
     locale: "en_US",
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteName} | Strategic Designer`,
+    title: `${siteName} · Strategic Designer`,
     description: siteDescription,
     images: [socialImagePath],
   },
@@ -119,7 +119,7 @@ export default function RootLayout({
       {
         "@type": "WebPage",
         "@id": `${siteUrl}/#webpage`,
-        name: `${siteName} | Strategic Designer`,
+        name: `${siteName} · Strategic Designer`,
         url: siteUrl,
         description: siteDescription,
         isPartOf: { "@id": `${siteUrl}/#website` },

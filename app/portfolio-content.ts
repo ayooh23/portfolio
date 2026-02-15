@@ -36,7 +36,7 @@ export const PROJECTS: Project[] = [
     title: "BR-ND People",
     roleLine: "Design & Innovation Lead · 2021–Present",
     description:
-      "Creative change agency working on culture, strategy, and expression. | Currently working here, running design and innovation - split between building internal tools/systems and leading external client projects across healthcare, public sector, and creative industries. Small studio means wearing many hats: project management, research design, visual identity, prototyping, client delivery.",
+      "Creative change agency working on culture, strategy, and expression. · I run design and innovation - split between building internal tools/systems and leading external client projects across healthcare, public sector, and creative industries. Small studio means wearing many hats: project management, research design, visual identity, prototyping, client delivery.",
     bullets: [
       "Internal work: Tools and frameworks for transformation projects. Workflows that help us work better. Brand contributions across visual identity and digital.",
       "Client work: Research and strategy. Brand equity studies. Service design. Stakeholder alignment. Innovation programs. Healthcare, public sector, enterprise.",
@@ -49,7 +49,7 @@ export const PROJECTS: Project[] = [
     title: "OLVG · D&O (Dokter & Opvang)",
     roleLine: "Service Design Lead · 2024–2025",
     description:
-      "Because real care doesn't stop at the exit door. | Healthcare innovation supporting vulnerable patients across hospitals, NGOs, and social services.",
+      "Because real care doesn't stop at the exit door. · Healthcare innovation supporting vulnerable patients across hospitals, NGOs, and social services.",
     bullets: [
       "Designed service flows and digital platforms connecting hospitals, NGOs, and public services, each with different constraints and languages.",
       "Rapidly prototyped and validated tools with frontline staff during actual shifts, iterating based on real use.",
@@ -68,9 +68,9 @@ export const PROJECTS: Project[] = [
   {
     id: "stroll",
     title: "Stroll",
-    roleLine: "Founder & Venture Experiment Lead · 2024–2025",
+    roleLine: "Co-founder & Product Lead · 2024–2025",
     description:
-      "What if navigation felt like intuition? | Early-stage product exploring new grounds in AI-powered navigation, no screens required.",
+      "What if navigation felt like intuition? · Early-stage product exploring new grounds in AI-powered navigation, no screens required.",
     bullets: [
       "Framed product strategy and experimentation roadmap, from idea to testable prototype.",
       "Designed haptic interaction patterns that guide without directing, working at the intersection of AI, embodied interaction, and spatial computing.",
@@ -88,7 +88,7 @@ export const PROJECTS: Project[] = [
     title: "ASML · DMS Evaluation",
     roleLine: "Innovation & Systems Design (Thesis) · 2023–2024",
     description:
-      "When engineers play games, researchers learn how they think. | Research project exploring decision-making in deep-tech semiconductor manufacturing through simulation.",
+      "When engineers play games, researchers learn how they think. · Research project exploring decision-making in deep-tech semiconductor manufacturing through simulation.",
     bullets: [
       "Designed an abstract simulation workshop where systems engineers played through scenarios while researchers observed their thinking patterns.",
       "Built the game mechanics and facilitation framework that made invisible decision-making visible and analyzable.",
@@ -102,7 +102,7 @@ export const PROJECTS: Project[] = [
     title: "Tiny Troubles",
     roleLine: "Co-founder · 2019–2021",
     description:
-      "Planet Earth is worth causing trouble for. | Early-stage platform using Web3 to bridge digital creativity and real-world social impact.",
+      "Planet Earth is worth causing trouble for. · Early-stage platform using Web3 to bridge digital creativity and real-world social impact.",
     bullets: [
       "Co-led product strategy and positioning for a platform exploring new grounds, testing how digital art could fund tangible good through emerging tech.",
       "Designed the experience and brand identity, working at the intersection of Web3, community, and social impact.",
@@ -118,7 +118,7 @@ export const AYU_TILE: Project = {
   title: "Ayu Koene",
   roleLine: "Strategic designer",
   description:
-    "Hello! My name is Ayu. I'm a strategic designer with a background in mechanical engineering, digital design, and brand strategy. I specialize in building concepts from early vision to tangible outcomes, working at the intersection of design, technology, and business. For as long as I can remember, I've been passionate about creating appealing & functional things, on- and offline.",
+    "Hello! I'm Ayu, a strategic designer with a background in mechanical engineering, digital design, and brand strategy. I build concepts from early vision to tangible outcomes, working at the intersection of design, technology, and business. I've always been passionate about creating appealing & functional things, on- and offline.",
   bullets: [],
   thumb: "/images/ayu.jpg",
   links: [],

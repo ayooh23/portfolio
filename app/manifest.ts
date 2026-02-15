@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Ayu Koene | Strategic Designer",
+    name: "Ayu Koene · Strategic Designer",
     short_name: "Ayu Koene",
     description:
       "Strategic designer with a background in mechanical engineering, digital design, and brand strategy.",

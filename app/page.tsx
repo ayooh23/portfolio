@@ -72,6 +72,8 @@ const detailLinkClass =
 const splitPaneDesktopTabletPaddingClass = "py-10 px-8";
 const splitPaneHeaderClass = `${detailRowClass} items-center text-[15px] font-medium text-[#111]/80 sm:text-[12px]`;
 const splitPaneFooterBaseClass = "mt-4 min-h-[36px] text-[14px] leading-[1.75] sm:mt-3 sm:text-[12px]";
+const inlineActionControlClass =
+  "group inline-flex h-9 items-center gap-3 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1";
 const LOADER_SEEN_SESSION_KEY = "ayu-portfolio-loader-seen";
 const markerBadgeClass =
   "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#111]/15 text-[13px] leading-none text-[#111]/70";
@@ -941,6 +943,23 @@ function PortfolioContent() {
     return true;
   };
 
+  const setActiveTileById = (tileId: string) => {
+    setHasTileEnteredActiveCell(true);
+    setTilePos((prev) => {
+      const targetIndex = prev[tileId];
+      if (typeof targetIndex !== "number") return prev;
+      if (targetIndex === activeCellIndex) return prev;
+
+      const next = { ...prev };
+      const currentActiveTileId = tiles.find((tile) => prev[tile.id] === activeCellIndex)?.id;
+      next[tileId] = activeCellIndex;
+      if (currentActiveTileId) {
+        next[currentActiveTileId] = targetIndex;
+      }
+      return next;
+    });
+  };
+
   const onTileKeyDown = (tile: Project) => (event: React.KeyboardEvent<HTMLButtonElement>) => {
     const from = tilePos[tile.id];
     if (typeof from !== "number") return;
@@ -990,6 +1009,18 @@ function PortfolioContent() {
       setHasTileEnteredActiveCell(true);
     }
     setTilePos(next);
+  };
+
+  const renderProjectDescription = (description: string) => {
+    const [tagline, ...rest] = description.split(" · ");
+    if (rest.length === 0) return description;
+    return (
+      <>
+        {tagline}
+        <br />
+        {rest.join(" · ")}
+      </>
+    );
   };
 
   return (
@@ -1272,7 +1303,7 @@ function PortfolioContent() {
                 type="button"
                 onClick={shuffleTiles}
                 aria-controls="project-puzzle-board"
-                className={`group inline-flex h-9 items-center gap-3 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1 ${
+                className={`${inlineActionControlClass} ${
                   isHorizontalLayout ? "shrink-0 whitespace-nowrap" : ""
                 }`}
               >
@@ -1366,7 +1397,22 @@ function PortfolioContent() {
                     title="Latest explorations"
                     headingId="details-latest-explorations"
                   >
-                    <div className={detailBodyClass}>Vibe coding</div>
+                    <div className={`${detailBodyClass} space-y-2`}>
+                      <div>Vibe coding</div>
+                      <div>
+                        <a
+                          href="?tile=brnd"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            setActiveTileById("brnd");
+                          }}
+                          aria-controls="project-puzzle-board"
+                          className={detailLinkClass}
+                        >
+                          View current work at BR-ND People
+                        </a>
+                      </div>
+                    </div>
                   </DetailSection>
                 </div>
               ) : (
@@ -1378,7 +1424,7 @@ function PortfolioContent() {
                   >
                     <div className={detailBodyClass}>
                       <div>{activeTile.roleLine}</div>
-                      <p className="mt-1">{activeTile.description}</p>
+                      <p className="mt-1">{renderProjectDescription(activeTile.description)}</p>
                     </div>
                   </DetailSection>
                   {activeTile.bullets.length > 0 ? (
@@ -1460,9 +1506,29 @@ function PortfolioContent() {
                         className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]"
                         role="list"
                       >
-                        <div role="listitem">Stefan David von Franquemont · 3D Artist</div>
+                        <div role="listitem">
+                          <a
+                            href="https://web.archive.org/web/20210509064724/http://stefandavid.com/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className={detailLinkClass}
+                          >
+                            Stefan David von Franquemont
+                          </a>{" "}
+                          · 3D Artist
+                        </div>
                         <div role="listitem">Sinyo Koene · Software Engineer</div>
-                        <div role="listitem">Luz David von Franquemont · Storytelling</div>
+                        <div role="listitem">
+                          <a
+                            href="https://www.illuzione.com/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className={detailLinkClass}
+                          >
+                            Luz David von Franquemont
+                          </a>{" "}
+                          · Storytelling
+                        </div>
                       </div>
                     </DetailSection>
                   ) : null}
