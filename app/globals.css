@@ -44,7 +44,7 @@
 
 @keyframes active-cell-attention {
     0% {
-        outline-width: 1.0px;
+        outline-width: 0.5px;
         outline-color: rgba(17,17,17,.18);
         box-shadow: 0 0 0 1.0px rgba(17,17,17,.1), inset 0 1px 0 rgba(255,255,255,.66)
     }
@@ -56,14 +56,14 @@
     }
 
     100% {
-        outline-width: 1.0px;
+        outline-width: 0.5px;
         outline-color: rgba(17,17,17,.18);
         box-shadow: 0 0 0 1.0px rgba(17,17,17,.1), inset 0 1px 0 rgba(255,255,255,.66)
     }
 }
 
 .active-cell-pre-interaction-blink {
-    animation: active-cell-attention 3.6s ease-in-out infinite;
+    animation: active-cell-attention 2s ease-in-out infinite;
     outline-style: solid;
     outline-offset: 0;
     will-change: outline-width,outline-color,box-shadow
