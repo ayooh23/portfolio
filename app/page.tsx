@@ -1329,6 +1329,17 @@ function PortfolioContent() {
                   </DetailSection>
                   <DetailSection
                     marker={<NumberBadge n={2} />}
+                    title="Capabilities"
+                    headingId="details-capabilities"
+                  >
+                    <div className={detailBodyClass}>
+                      Strategy & product vision · Service & experience design · Hands-on prototyping
+                      & making · Systems thinking · Visual & interaction design · Research &
+                      synthesis · AI as creative tool · Engineering & technical collaboration
+                    </div>
+                  </DetailSection>
+                  <DetailSection
+                    marker={<NumberBadge n={3} />}
                     title="Education"
                     headingId="details-education"
                   >
@@ -1348,17 +1359,6 @@ function PortfolioContent() {
                         BSc Mechanical Engineering · University of Twente &amp; Vrije Universiteit
                         Amsterdam
                       </div>
-                    </div>
-                  </DetailSection>
-                  <DetailSection
-                    marker={<NumberBadge n={3} />}
-                    title="Capabilities"
-                    headingId="details-capabilities"
-                  >
-                    <div className={detailBodyClass}>
-                      Strategy & product vision · Service & experience design · Hands-on prototyping
-                      & making · Systems thinking · Visual & interaction design · Research &
-                      synthesis · AI as creative tool · Engineering & technical collaboration
                     </div>
                   </DetailSection>
                   <DetailSection
@@ -1396,39 +1396,6 @@ function PortfolioContent() {
                             {b}
                           </div>
                         ))}
-                      </div>
-                    </DetailSection>
-                  ) : null}
-                  {activeTile.id === "brnd" ? (
-                    <DetailSection
-                      marker={<PlusBadge />}
-                      title="Recent builds"
-                      headingId="details-brnd-recent-builds"
-                    >
-                      <div className={detailBodyClass} role="list">
-                        <div role="listitem">
-                          <a
-                            href="https://br-ndpeople.com"
-                            target="_blank"
-                            rel="noreferrer"
-                            className={detailLinkClass}
-                          >
-                            Website refresh
-                          </a>
-                        </div>
-                        <div role="listitem">
-                          <a
-                            href="https://www.br-ndpeople.com/whats-new/23plusone-happiness-scan"
-                            target="_blank"
-                            rel="noreferrer"
-                            className={detailLinkClass}
-                          >
-                            23plusone happiness scan + research dashboard platform
-                          </a>
-                        </div>
-                        <div role="listitem">
-                          Credits:  Built with Sinyo Koene (Software Engineer · Data Analyst) Next.js, GSAP, and AI collaboration. 
-                        </div>
                       </div>
                     </DetailSection>
                   ) : null}
@@ -1509,6 +1476,13 @@ function PortfolioContent() {
                         className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]"
                         role="list"
                       >
+                        {activeTile.id === "brnd" ? (
+                          <div role="listitem">
+                            Recent builds: Website refresh (Next.js/GSAP/AI), 23plusone
+                            research platform (with Sinyo Koene), internal operating
+                            systems.
+                          </div>
+                        ) : null}
                         {activeTile.links.map((link) => (
                           <div key={`${activeTile.id}-${link.label}-${link.href}`} role="listitem">
                             <a

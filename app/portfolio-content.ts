@@ -36,11 +36,10 @@ export const PROJECTS: Project[] = [
     title: "BR-ND People",
     roleLine: "Design & Innovation Lead · 2021–Present",
     description:
-      "Creative change agency working on culture, strategy, and expression. | Currently working here as design & innovation lead and project manager—shaping internal workflows and tools while leading external client projects across healthcare, public sector, and creative industries.",
+      "Creative change agency working on culture, strategy, and expression. | Currently working here, running design and innovation - split between building internal tools/systems and leading external client projects across healthcare, public sector, and creative industries. Small studio means wearing many hats: project management, research design, visual identity, prototyping, client delivery.",
     bullets: [
-      "Designing tools and frameworks to support organisational transformation.",
-      "Developing internal workflows and processes to help the studio work better, while managing client delivery and project timelines.",
-      "Contributing to BR-ND People's own brand across visual identity, materials, and digital touchpoints.",
+      "Internal work: Tools and frameworks for transformation projects. Workflows that help us work better. Brand contributions across visual identity and digital.",
+      "Client work: Research and strategy. Brand equity studies. Service design. Stakeholder alignment. Innovation programs. Healthcare, public sector, enterprise.",
     ],
     thumb: "/images/thumb_br-ndpeople.jpg",
     links: [{ label: "Visit website", href: "https://br-ndpeople.com" }],
