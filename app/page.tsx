@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import gsap from "gsap";
 import {
   ACTIVE_CELL_HINT_TEXT,
@@ -12,6 +12,7 @@ import {
   LOADING_GALLERY,
   PROJECT_IMAGE_SEQUENCES,
   TILES,
+  type ProjectLink,
   type Project,
 } from "@/app/portfolio-content";
 
@@ -63,20 +64,338 @@ function getTileTouchAction(from: number, emptyIndices: number[], cols: number):
   return canMoveX ? "pan-y" : "pan-x";
 }
 
-const detailRowClass = "grid grid-cols-[24px_1fr] gap-3";
+function getEaseTimeProgressForDistanceProgress(distanceProgress: number) {
+  const clampedProgress = Math.max(0, Math.min(1, distanceProgress));
+  if (clampedProgress <= 0 || clampedProgress >= 1) return clampedProgress;
+
+  const ease = gsap.parseEase(overlaySettleEase) as (value: number) => number;
+  let low = 0;
+  let high = 1;
+
+  for (let i = 0; i < 16; i += 1) {
+    const mid = (low + high) / 2;
+    if (ease(mid) < clampedProgress) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+
+  return (low + high) / 2;
+}
+
+function getGalleryBentoSpanClass(index: number, total: number) {
+  if (total <= 1) return "aspect-[4/3] md:aspect-auto md:col-span-6 md:row-span-4";
+  if (total === 2) {
+    return "aspect-[4/3] md:aspect-auto md:col-span-3 md:row-span-3";
+  }
+  if (total === 3) {
+    const threeItemPattern = [
+      "aspect-[4/3] md:aspect-auto md:col-span-6 md:row-span-3",
+      "aspect-[4/3] md:aspect-auto md:col-span-3 md:row-span-2",
+      "aspect-[4/3] md:aspect-auto md:col-span-3 md:row-span-2",
+    ];
+    return threeItemPattern[index % threeItemPattern.length];
+  }
+
+  const pattern = [
+    "aspect-[4/3] md:aspect-auto md:col-span-4 md:row-span-3",
+    "aspect-[4/3] md:aspect-auto md:col-span-2 md:row-span-2",
+    "aspect-[4/3] md:aspect-auto md:col-span-2 md:row-span-2",
+    "aspect-[4/3] md:aspect-auto md:col-span-4 md:row-span-2",
+    "aspect-[4/3] md:aspect-auto md:col-span-3 md:row-span-2",
+    "aspect-[4/3] md:aspect-auto md:col-span-3 md:row-span-2",
+  ];
+  return pattern[index % pattern.length];
+}
+
+function hasMetadataValue(value: string) {
+  const normalized = value.trim().toLowerCase();
+  return normalized.length > 0 && normalized !== "(none)" && normalized !== "none";
+}
+
+const detailRowClass = "grid grid-cols-[18px_1fr] items-start gap-2.5";
+const detailMarkerSlotClass = "flex h-[18px] items-center justify-center";
 const detailTitleClass = "text-[15px] font-medium text-[#111]/85 sm:text-[13px]";
 const detailBodyClass =
   "mt-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]";
 const detailLinkClass =
   "underline decoration-[#111]/20 underline-offset-2 transition hover:decoration-[#111]/50 hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/35 focus-visible:ring-offset-1";
 const splitPaneDesktopTabletPaddingClass = "py-10 px-8";
-const splitPaneHeaderClass = `${detailRowClass} items-center text-[15px] font-medium text-[#111]/80 sm:text-[12px]`;
+const splitPaneHeaderClass =
+  "grid grid-cols-[18px_1fr] items-center gap-2.5 text-[15px] font-medium text-[#111]/80 sm:text-[12px]";
 const splitPaneFooterBaseClass = "mt-4 min-h-[36px] text-[14px] leading-[1.75] sm:mt-3 sm:text-[12px]";
 const inlineActionControlClass =
   "group inline-flex h-9 items-center gap-3 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1";
 const LOADER_SEEN_SESSION_KEY = "ayu-portfolio-loader-seen";
 const markerBadgeClass =
-  "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#111]/15 text-[13px] leading-none text-[#111]/70";
+  "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#111]/72 text-[10px] leading-none text-[#111]/72";
+const galleryBentoGridClass =
+  "grid grid-cols-1 gap-2 md:grid-cols-6 md:auto-rows-[clamp(112px,10vw,188px)] md:gap-3";
+const overlaySettleEase = "power3.out";
+const overlayMotionDurationMs = 820;
+const overlayCleanupBufferMs = 220;
+const overlayTileLeadSeconds = 0.06;
+const MOBILE_GALLERY_OVERLAY_TOP = 0;
+const PROJECT_GALLERY_VIDEOS: Record<string, string> = {
+  tiny: "/images/projects/tiny/tiny-gallery.mp4",
+};
+const TINY_TRAITS_IMAGE = "/images/projects/tiny/tiny-traits.jpg";
+const TINY_ROW_IMAGE_ORDER = [
+  "/images/projects/tiny/tiny1.jpeg",
+  "/images/projects/tiny/tiny2.jpeg",
+  "/images/projects/tiny/tiny3.jpeg",
+  "/images/thumb_tiny.jpeg",
+];
+const AYU_GALLERY_BUSY_PLACEHOLDER =
+  `Placeholder:
+add
+what
+is
+currently
+keeping
+you
+busy
+outside
+client/project
+work.`;
+const AYU_GALLERY_INTERESTS_PLACEHOLDER =
+  "Placeholder: share a few interests, hobbies, and side obsessions (for example: movement, materials, music, outdoors, film, gaming, cooking).";
+const DIRECT_VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
+const VIDEO_POSTERS: Record<string, string> = {
+  "/images/projects/do/DO_explainer.mp4": "/images/projects/do/DO_explainer-Cover.jpg",
+};
+
+type GalleryLinkPreview =
+  | { kind: "none" }
+  | { kind: "webpage"; embedSrc: string }
+  | { kind: "pdf"; embedSrc: string }
+  | { kind: "video"; embedSrc: string; mode: "iframe" | "native" };
+
+function parseHref(href: string) {
+  try {
+    return new URL(href, "https://portfolio.local");
+  } catch {
+    return null;
+  }
+}
+
+function isPdfHref(href: string) {
+  const normalizedPath = href.toLowerCase().split(/[?#]/)[0];
+  return normalizedPath.endsWith(".pdf");
+}
+
+function isDirectVideoHref(href: string) {
+  const normalizedPath = href.toLowerCase().split(/[?#]/)[0];
+  return DIRECT_VIDEO_EXTENSIONS.some((extension) => normalizedPath.endsWith(extension));
+}
+
+function getYouTubeEmbedSrc(href: string) {
+  const parsed = parseHref(href);
+  if (!parsed) return null;
+
+  const hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+  const segments = parsed.pathname.split("/").filter(Boolean);
+  let videoId = "";
+
+  if (hostname === "youtu.be") {
+    videoId = segments[0] ?? "";
+  } else if (hostname === "youtube.com" || hostname === "m.youtube.com") {
+    if (segments[0] === "watch") {
+      videoId = parsed.searchParams.get("v") ?? "";
+    } else if (segments[0] === "embed" || segments[0] === "shorts") {
+      videoId = segments[1] ?? "";
+    }
+  }
+
+  const safeVideoId = videoId.replace(/[^A-Za-z0-9_-]/g, "");
+  if (!safeVideoId) return null;
+
+  const params = new URLSearchParams({
+    rel: "0",
+    modestbranding: "1",
+    playsinline: "1",
+  });
+
+  return `https://www.youtube.com/embed/${safeVideoId}?${params.toString()}`;
+}
+
+function getPdfCoverEmbedSrc(href: string) {
+  const [baseHref] = href.split("#");
+  return `${baseHref}#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0`;
+}
+
+function resolveGalleryLinkPreview(href: string): GalleryLinkPreview {
+  const trimmedHref = href.trim();
+  if (!trimmedHref) return { kind: "none" };
+
+  if (isPdfHref(trimmedHref)) {
+    return { kind: "pdf", embedSrc: getPdfCoverEmbedSrc(trimmedHref) };
+  }
+
+  const youTubeEmbedSrc = getYouTubeEmbedSrc(trimmedHref);
+  if (youTubeEmbedSrc) {
+    return { kind: "video", embedSrc: youTubeEmbedSrc, mode: "iframe" };
+  }
+
+  if (isDirectVideoHref(trimmedHref)) {
+    return { kind: "video", embedSrc: trimmedHref, mode: "native" };
+  }
+
+  if (
+    trimmedHref.startsWith("http://") ||
+    trimmedHref.startsWith("https://") ||
+    trimmedHref.startsWith("/")
+  ) {
+    return { kind: "webpage", embedSrc: trimmedHref };
+  }
+
+  return { kind: "none" };
+}
+
+function isArticleLink(link: ProjectLink) {
+  return /article/i.test(link.label);
+}
+
+function isPaperLink(link: ProjectLink) {
+  return /paper/i.test(link.label) || isPdfHref(link.href);
+}
+
+function isResearchPaperLink(link: ProjectLink) {
+  return /research paper/i.test(link.label);
+}
+
+function isPortfolioPdfLink(link: ProjectLink) {
+  return /portfolio pdf/i.test(link.label);
+}
+
+function isExplainerVideoLink(link: ProjectLink) {
+  return /explainer|trailer|video/i.test(link.label) || isDirectVideoHref(link.href);
+}
+
+function GalleryLinkCard({
+  link,
+  projectTitle,
+  isHorizontalLayout,
+  className,
+  autoPlayVideo = false,
+  pdfPreviewClassName,
+}: {
+  link: ProjectLink;
+  projectTitle: string;
+  isHorizontalLayout: boolean;
+  className?: string;
+  autoPlayVideo?: boolean;
+  pdfPreviewClassName?: string;
+}) {
+  const preview = resolveGalleryLinkPreview(link.href);
+  const isExternal = link.href.startsWith("http://") || link.href.startsWith("https://");
+  const hasEmbed = preview.kind !== "none";
+  const pdfEmbedSrc =
+    preview.kind === "pdf"
+      ? `${preview.embedSrc}${preview.embedSrc.includes("#") ? "&" : "#"}page=1&zoom=page-fit&pagemode=none&toolbar=0&navpanes=0&scrollbar=0`
+      : null;
+  const [isVideoMuted, setIsVideoMuted] = useState(autoPlayVideo);
+
+  return (
+    <article
+      className={`h-full overflow-hidden rounded-[12px] bg-[#f3f3f3] shadow-[inset_0_0_0_1px_rgba(17,17,17,0.06)] ${className ?? ""}`}
+    >
+      {hasEmbed ? null : (
+        <a
+          href={link.href}
+          target={isExternal ? "_blank" : undefined}
+          rel={isExternal ? "noreferrer" : undefined}
+          className="group flex min-h-[120px] items-center justify-center px-5 py-4 transition-colors duration-300 hover:bg-[#ececec] focus-visible:bg-[#e7e7e7] focus-visible:outline-none md:min-h-[138px] md:px-6 md:py-5"
+        >
+          <span className="sr-only">{`Open ${projectTitle} ${link.label}`}</span>
+          <span
+            aria-hidden="true"
+            className="text-[18px] leading-none text-[#111]/50 transition-transform duration-300 group-hover:translate-x-[1px] group-hover:-translate-y-[1px]"
+          >
+            ↗
+          </span>
+        </a>
+      )}
+      {hasEmbed ? (
+        <div className="bg-white">
+          {preview.kind === "video" ? (
+            <div className="relative aspect-video w-full overflow-hidden bg-[#111]">
+              {preview.mode === "native" ? (
+                <>
+                  <video
+                    autoPlay={autoPlayVideo}
+                    muted={isVideoMuted}
+                    loop={autoPlayVideo}
+                    controls={!autoPlayVideo}
+                    playsInline
+                    preload="metadata"
+                    poster={VIDEO_POSTERS[preview.embedSrc] ?? undefined}
+                    className="h-full w-full object-cover"
+                    aria-label={`${projectTitle} ${link.label} video preview`}
+                  >
+                    <source src={preview.embedSrc} />
+                  </video>
+                  {autoPlayVideo ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsVideoMuted((prevMuted) => !prevMuted)}
+                      className="absolute right-3 top-3 z-10 inline-flex h-8 items-center rounded-full border border-white/30 bg-black/55 px-3 text-[10px] uppercase tracking-[0.14em] text-white backdrop-blur-sm transition hover:bg-black/72 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
+                    >
+                      {isVideoMuted ? "Audio on" : "Audio off"}
+                    </button>
+                  ) : null}
+                </>
+              ) : (
+                <iframe
+                  src={preview.embedSrc}
+                  title={`${projectTitle} ${link.label} video preview`}
+                  loading="lazy"
+                  className="h-full w-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+              )}
+            </div>
+          ) : null}
+          {preview.kind === "pdf" ? (
+            <div
+              className={`relative w-full overflow-auto bg-white ${
+                pdfPreviewClassName ?? "aspect-[3/4]"
+              }`}
+            >
+              <iframe
+                src={pdfEmbedSrc ?? preview.embedSrc}
+                title={`${projectTitle} ${link.label} PDF cover`}
+                loading="lazy"
+                className="h-full w-full border-0"
+              />
+            </div>
+          ) : null}
+          {preview.kind === "webpage" ? (
+            <div
+              className={`relative w-full overflow-hidden bg-white ${
+                isHorizontalLayout
+                  ? "h-[68vh] min-h-[520px] max-h-[780px]"
+                  : "h-[62vh] min-h-[420px] max-h-[680px]"
+              }`}
+            >
+              <iframe
+                src={preview.embedSrc}
+                title={`${projectTitle} ${link.label} webpage preview`}
+                loading="lazy"
+                className="h-full w-full border-0"
+                sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </article>
+  );
+}
 
 function PlusBadge() {
   return (
@@ -102,7 +421,7 @@ function DetailSection({
 }) {
   return (
     <section data-active-line className={detailRowClass} aria-labelledby={headingId}>
-      <div className="pt-[2px]">{marker}</div>
+      <div className={detailMarkerSlotClass}>{marker}</div>
       <div>
         <h3 id={headingId} className="sr-only">
           {title}
@@ -142,6 +461,10 @@ function PortfolioContent() {
   const loaderImageIndexRef = useRef(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinePointer, setIsFinePointer] = useState(false);
+  const [isNextProjectHovering, setIsNextProjectHovering] = useState(false);
+  const [isCloseCaseHovering, setIsCloseCaseHovering] = useState(false);
+  const [isOpenCaseHovering, setIsOpenCaseHovering] = useState(false);
+  const [isGalleryOpeningTransition, setIsGalleryOpeningTransition] = useState(false);
   const [loaderTypeChars, setLoaderTypeChars] = useState(0);
   const [loaderSublineChars, setLoaderSublineChars] = useState(0);
   const [loaderImageIndex, setLoaderImageIndex] = useState(0);
@@ -150,7 +473,10 @@ function PortfolioContent() {
   const boardRef = useRef<HTMLDivElement | null>(null);
   const tileRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const activePanelRef = useRef<HTMLDivElement | null>(null);
+  const floatingTileRef = useRef<HTMLDivElement | null>(null);
+  const galleryScrollRef = useRef<HTMLDivElement | null>(null);
   const prevActiveIdRef = useRef<string | null>(null);
+  const galleryOpeningTransitionTimeoutRef = useRef<number | null>(null);
 
   // --- Layout knobs: 3x3 grid, 6 tiles + 3 empty
   const grid: GridSize = { cols: 3, rows: 3 };
@@ -677,6 +1003,278 @@ function PortfolioContent() {
     }
     return null;
   }, [tiles, tilePos, activeCellIndex]);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryTileId, setGalleryTileId] = useState<string | null>(null);
+  const [desktopOverlayLeft, setDesktopOverlayLeft] = useState<number>(0);
+  const [floatingTileRect, setFloatingTileRect] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const galleryTile = useMemo(
+    () => (galleryTileId ? tiles.find((tile) => tile.id === galleryTileId) ?? null : null),
+    [galleryTileId, tiles]
+  );
+  const galleryProjectTiles = useMemo(() => tiles, [tiles]);
+  const nextGalleryProject = useMemo(() => {
+    if (galleryProjectTiles.length === 0) return null;
+    if (!galleryTile) return galleryProjectTiles[0] ?? null;
+    const currentIndex = galleryProjectTiles.findIndex((tile) => tile.id === galleryTile.id);
+    const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % galleryProjectTiles.length : 0;
+    return galleryProjectTiles[nextIndex] ?? null;
+  }, [galleryProjectTiles, galleryTile]);
+  const visibleCursorPreviewImageSrc =
+    isGalleryOpen && isNextProjectHovering ? nextGalleryProject?.thumb ?? null : null;
+  const isOpenCaseCursorVisible =
+    !isGalleryOpen &&
+    isOpenCaseHovering &&
+    !isCloseCaseHovering &&
+    !Boolean(visibleCursorPreviewImageSrc);
+  const isCloseCaseCursorVisible =
+    isGalleryOpen &&
+    !isGalleryOpeningTransition &&
+    isCloseCaseHovering &&
+    !Boolean(visibleCursorPreviewImageSrc);
+  const isGalleryLifecycleActive = galleryTileId !== null;
+  const activeTileImages = useMemo(() => {
+    if (!activeTile) return [];
+    const sequence = PROJECT_IMAGE_SEQUENCES[activeTile.id] ?? [];
+    const sourceImages = sequence.length > 0 ? sequence : [activeTile.thumb];
+    return sourceImages.filter((imageSrc) => imageSrc !== activeTile.thumb);
+  }, [activeTile]);
+  const galleryImages = useMemo(() => {
+    if (!galleryTile) return [];
+    const sequence = PROJECT_IMAGE_SEQUENCES[galleryTile.id] ?? [];
+    const sourceImages = sequence.length > 0 ? sequence : [galleryTile.thumb];
+    return sourceImages.filter((imageSrc) => imageSrc !== galleryTile.thumb);
+  }, [galleryTile]);
+  const tinySequenceImages = useMemo(() => {
+    if (!galleryTile || galleryTile.id !== "tiny") return [];
+    const sequence = PROJECT_IMAGE_SEQUENCES[galleryTile.id] ?? [];
+    const sourceImages = sequence.length > 0 ? sequence : [galleryTile.thumb];
+    return Array.from(new Set(sourceImages.filter((imageSrc) => imageSrc !== galleryTile.thumb)));
+  }, [galleryTile]);
+  const galleryStandaloneImages = useMemo(() => {
+    if (!galleryTile || galleryTile.id !== "tiny") return galleryImages;
+    const hiddenTinyImages = new Set<string>([TINY_TRAITS_IMAGE, ...TINY_ROW_IMAGE_ORDER]);
+    return tinySequenceImages.filter((imageSrc) => !hiddenTinyImages.has(imageSrc));
+  }, [galleryImages, galleryTile, tinySequenceImages]);
+  const ayuGalleryImages = useMemo(() => {
+    if (!galleryTile || galleryTile.id !== "ayu") return [];
+    const sequence = PROJECT_IMAGE_SEQUENCES[galleryTile.id] ?? [];
+    const sourceImages = sequence.length > 0 ? sequence : [galleryTile.thumb];
+    return Array.from(new Set(sourceImages));
+  }, [galleryTile]);
+  const galleryVideoSrc = useMemo(
+    () => (galleryTile ? PROJECT_GALLERY_VIDEOS[galleryTile.id] ?? null : null),
+    [galleryTile]
+  );
+  const doGalleryLinks = useMemo(() => {
+    if (!galleryTile || galleryTile.id !== "do") return null;
+    const links = galleryTile.links ?? [];
+    const explainer = links.find((link) => isExplainerVideoLink(link));
+    const article = links.find((link) => isArticleLink(link));
+    const paper = links.find((link) => isPaperLink(link));
+    const usedLinks = new Set([explainer, article, paper].filter(Boolean));
+    const remaining = links.filter((link) => !usedLinks.has(link));
+    return { explainer, article, paper, remaining };
+  }, [galleryTile]);
+  const doGalleryBentoLinks = useMemo(() => {
+    if (!doGalleryLinks) return [];
+    const orderedLinks: ProjectLink[] = [];
+    if (doGalleryLinks.explainer) orderedLinks.push(doGalleryLinks.explainer);
+    if (doGalleryLinks.article) orderedLinks.push(doGalleryLinks.article);
+    if (doGalleryLinks.paper) orderedLinks.push(doGalleryLinks.paper);
+    orderedLinks.push(...doGalleryLinks.remaining);
+    return orderedLinks;
+  }, [doGalleryLinks]);
+  const hasGallery = Boolean(
+    activeTile &&
+      (activeTileImages.length > 0 ||
+        Boolean(PROJECT_GALLERY_VIDEOS[activeTile.id]) ||
+        Boolean(activeTile.links && activeTile.links.length > 0))
+  );
+  const galleryOverlayTop = isHorizontalLayout ? 0 : MOBILE_GALLERY_OVERLAY_TOP;
+  const galleryContentTopPadding = floatingTileRect
+    ? Math.max(0, Math.round(floatingTileRect.top - galleryOverlayTop + floatingTileRect.height))
+    : Math.round(cell);
+
+  const getTileRect = useCallback((tileId: string) => {
+    const tileEl = tileRefs.current[tileId];
+    if (!tileEl) return null;
+    const rect = tileEl.getBoundingClientRect();
+    return {
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+    };
+  }, []);
+
+  const clearGalleryOpeningTransitionTimeout = useCallback(() => {
+    if (galleryOpeningTransitionTimeoutRef.current === null) return;
+    window.clearTimeout(galleryOpeningTransitionTimeoutRef.current);
+    galleryOpeningTransitionTimeoutRef.current = null;
+  }, []);
+
+  const closeGallery = useCallback(() => {
+    clearGalleryOpeningTransitionTimeout();
+    setIsGalleryOpeningTransition(false);
+    setIsNextProjectHovering(false);
+    setIsCloseCaseHovering(false);
+    setIsOpenCaseHovering(false);
+    setIsGalleryOpen(false);
+  }, [clearGalleryOpeningTransitionTimeout]);
+
+  const openGallery = () => {
+    if (!activeTile) return;
+    const rect = getTileRect(activeTile.id);
+    clearGalleryOpeningTransitionTimeout();
+    setIsGalleryOpeningTransition(true);
+    setIsNextProjectHovering(false);
+    setIsCloseCaseHovering(false);
+    setIsOpenCaseHovering(false);
+    if (rect) {
+      setFloatingTileRect(rect);
+    }
+    setGalleryTileId(activeTile.id);
+    setIsGalleryOpen(true);
+    galleryOpeningTransitionTimeoutRef.current = window.setTimeout(() => {
+      setIsGalleryOpeningTransition(false);
+      galleryOpeningTransitionTimeoutRef.current = null;
+    }, overlayMotionDurationMs);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (galleryOpeningTransitionTimeoutRef.current === null) return;
+      window.clearTimeout(galleryOpeningTransitionTimeoutRef.current);
+      galleryOpeningTransitionTimeoutRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isGalleryOpen) return;
+    const timeoutId = window.setTimeout(() => {
+      setGalleryTileId(null);
+      setFloatingTileRect(null);
+    }, overlayMotionDurationMs + overlayCleanupBufferMs);
+    return () => window.clearTimeout(timeoutId);
+  }, [isGalleryOpen]);
+
+  useEffect(() => {
+    if (!isGalleryOpen || !galleryTileId) return;
+    const scroller = galleryScrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTop = 0;
+  }, [galleryTileId, isGalleryOpen]);
+
+  useEffect(() => {
+    if (!isGalleryOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeGallery();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [closeGallery, isGalleryOpen]);
+
+  useEffect(() => {
+    if (!galleryTileId || !floatingTileRect) return;
+    const floatingEl = floatingTileRef.current;
+    if (!floatingEl) return;
+
+    gsap.killTweensOf(floatingEl);
+    const motionDurationSeconds = overlayMotionDurationMs / 1000;
+
+    if (isGalleryOpen) {
+      const boardRect = boardRef.current?.getBoundingClientRect();
+      const targetLeft =
+        isHorizontalLayout
+          ? desktopOverlayLeft - floatingTileRect.width - gap
+          : floatingTileRect.left;
+      const targetTop =
+        isHorizontalLayout && boardRect ? boardRect.top : floatingTileRect.top;
+      const shiftX = targetLeft - floatingTileRect.left;
+      const shiftY = targetTop - floatingTileRect.top;
+      const overlayStartLeft = typeof window === "undefined" ? 0 : window.innerWidth;
+      const overlayEndLeft = desktopOverlayLeft;
+      const tileCollisionLeft = floatingTileRect.left + floatingTileRect.width + gap;
+      const overlayTravelDistance = Math.max(0, overlayStartLeft - overlayEndLeft);
+      const overlayTravelToCollision = Math.max(0, overlayStartLeft - tileCollisionLeft);
+      const collisionDistanceProgress =
+        overlayTravelDistance > 0 ? overlayTravelToCollision / overlayTravelDistance : 0;
+      const collisionTimeProgress = isHorizontalLayout
+        ? getEaseTimeProgressForDistanceProgress(collisionDistanceProgress)
+        : 0;
+      const collisionAlignedDelaySeconds = Math.min(
+        Math.max(0, motionDurationSeconds - 0.12),
+        motionDurationSeconds * collisionTimeProgress
+      );
+      const openDelaySeconds = Math.max(
+        0,
+        collisionAlignedDelaySeconds - overlayTileLeadSeconds
+      );
+      const openDurationSeconds = Math.max(0.12, motionDurationSeconds - openDelaySeconds);
+
+      gsap.set(floatingEl, { x: 0, y: 0, scale: 1, autoAlpha: 1 });
+      gsap.to(floatingEl, {
+        x: shiftX,
+        y: shiftY,
+        scale: 1,
+        delay: openDelaySeconds,
+        duration: openDurationSeconds,
+        ease: overlaySettleEase,
+        overwrite: "auto",
+      });
+      return;
+    }
+
+    gsap.set(floatingEl, { autoAlpha: 1, scale: 1 });
+    gsap.to(floatingEl, {
+      x: 0,
+      y: 0,
+      duration: motionDurationSeconds,
+      ease: overlaySettleEase,
+      overwrite: "auto",
+    });
+  }, [
+    desktopOverlayLeft,
+    floatingTileRect,
+    gap,
+    galleryTileId,
+    isGalleryOpen,
+    isHorizontalLayout,
+  ]);
+
+  useEffect(() => {
+    if (!isHorizontalLayout) return;
+    const syncDesktopOverlayLeft = () => {
+      const viewportWidth = window.innerWidth;
+      const minOverlayWidth = Math.max(320, Math.min(520, Math.round(viewportWidth * 0.38)));
+      const maxLeft = Math.max(0, viewportWidth - minOverlayWidth);
+
+      const board = boardRef.current;
+      if (!board) {
+        const fallbackLeft = Math.max(0, Math.min(Math.round(viewportWidth * 0.34), maxLeft));
+        setDesktopOverlayLeft((prev) => (prev === fallbackLeft ? prev : fallbackLeft));
+        return;
+      }
+
+      const boardRect = board.getBoundingClientRect();
+      const secondColumnLeft = boardRect.left + cell + gap;
+      const clampedLeft = Math.max(0, Math.min(Math.round(secondColumnLeft), maxLeft));
+      setDesktopOverlayLeft((prev) => (prev === clampedLeft ? prev : clampedLeft));
+    };
+
+    syncDesktopOverlayLeft();
+    window.addEventListener("resize", syncDesktopOverlayLeft);
+
+    return () => {
+      window.removeEventListener("resize", syncDesktopOverlayLeft);
+    };
+  }, [cell, gap, isHorizontalLayout]);
+
   const nonProfileCellIndices = useMemo(
     () =>
       Array.from({ length: totalCells }, (_, idx) => idx).filter((idx) => idx !== profileTileIndex),
@@ -788,6 +1386,7 @@ function PortfolioContent() {
   });
 
   const onTilePointerDown = (tile: Project) => (e: React.PointerEvent) => {
+    if (isGalleryOpen) return;
     const el = tileRefs.current[tile.id];
     if (!el) return;
 
@@ -819,6 +1418,7 @@ function PortfolioContent() {
   };
 
   const onBoardPointerMove = (e: React.PointerEvent) => {
+    if (isGalleryOpen) return;
     const st = dragState.current;
     if (!st.id || st.pointerId !== e.pointerId) return;
 
@@ -868,6 +1468,13 @@ function PortfolioContent() {
   };
 
   const onBoardPointerUp = (e: React.PointerEvent) => {
+    if (isGalleryOpen) {
+      dragState.current.id = null;
+      dragState.current.axis = null;
+      dragState.current.targetIndex = null;
+      dragState.current.pointerId = null;
+      return;
+    }
     const st = dragState.current;
     if (!st.id || st.pointerId !== e.pointerId) return;
 
@@ -932,6 +1539,7 @@ function PortfolioContent() {
 
   // Keyboard parity for tile movement: arrow keys move toward an adjacent empty cell.
   const moveTileToIndex = (tileId: string, targetIndex: number) => {
+    if (isGalleryOpen) return false;
     const from = tilePos[tileId];
     if (typeof from !== "number") return false;
     if (!isAdjacent(from, targetIndex, grid.cols)) return false;
@@ -943,24 +1551,43 @@ function PortfolioContent() {
     return true;
   };
 
-  const setActiveTileById = (tileId: string) => {
-    setHasTileEnteredActiveCell(true);
-    setTilePos((prev) => {
-      const targetIndex = prev[tileId];
-      if (typeof targetIndex !== "number") return prev;
-      if (targetIndex === activeCellIndex) return prev;
+  const moveTileIntoActiveCell = useCallback(
+    (tileId: string) => {
+      setHasTileEnteredActiveCell(true);
+      setTilePos((prev) => {
+        const targetIndex = prev[tileId];
+        if (typeof targetIndex !== "number") return prev;
+        if (targetIndex === activeCellIndex) return prev;
 
-      const next = { ...prev };
-      const currentActiveTileId = tiles.find((tile) => prev[tile.id] === activeCellIndex)?.id;
-      next[tileId] = activeCellIndex;
-      if (currentActiveTileId) {
-        next[currentActiveTileId] = targetIndex;
-      }
-      return next;
-    });
+        const next = { ...prev };
+        const currentActiveTileId = tiles.find((tile) => prev[tile.id] === activeCellIndex)?.id;
+        next[tileId] = activeCellIndex;
+        if (currentActiveTileId) {
+          next[currentActiveTileId] = targetIndex;
+        }
+        return next;
+      });
+    },
+    [activeCellIndex, tiles]
+  );
+
+  const setActiveTileById = (tileId: string) => {
+    if (isGalleryOpen) return;
+    moveTileIntoActiveCell(tileId);
   };
 
+  const openNextGalleryProject = useCallback(() => {
+    if (!nextGalleryProject) return;
+    const rect = activeTile ? getTileRect(activeTile.id) : getTileRect(nextGalleryProject.id);
+    if (rect) {
+      setFloatingTileRect(rect);
+    }
+    setGalleryTileId(nextGalleryProject.id);
+    moveTileIntoActiveCell(nextGalleryProject.id);
+  }, [activeTile, getTileRect, moveTileIntoActiveCell, nextGalleryProject]);
+
   const onTileKeyDown = (tile: Project) => (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (isGalleryOpen) return;
     const from = tilePos[tile.id];
     if (typeof from !== "number") return;
 
@@ -998,6 +1625,7 @@ function PortfolioContent() {
   };
 
   const shuffleTiles = () => {
+    if (isGalleryOpen) return;
     const indices = Array.from({ length: totalCells }, (_, i) => i);
     for (let i = indices.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -1022,7 +1650,6 @@ function PortfolioContent() {
       </>
     );
   };
-
   return (
     <main
       id="main-content"
@@ -1036,8 +1663,36 @@ function PortfolioContent() {
         <div
           ref={cursorDotRef}
           aria-hidden="true"
-          className="pointer-events-none fixed left-0 top-0 z-[160] h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white mix-blend-difference opacity-0"
-        />
+          className={`pointer-events-none fixed left-0 top-0 z-[160] -translate-x-1/2 -translate-y-1/2 opacity-0 transition-[width,height,border-radius,box-shadow,background-color] duration-200 ${
+            visibleCursorPreviewImageSrc
+              ? "overflow-hidden rounded-[10px] bg-[#f3f3f3] bg-cover bg-center bg-no-repeat mix-blend-normal"
+              : isOpenCaseCursorVisible
+                ? "flex h-[110px] w-[110px] items-center justify-center rounded-full border border-[#111]/14 bg-white/92 mix-blend-difference"
+              : isCloseCaseCursorVisible
+                ? "flex h-[110px] w-[110px] items-center justify-center rounded-full border border-[#111]/14 bg-white/92 mix-blend-difference"
+              : "h-2.5 w-2.5 rounded-full bg-white mix-blend-difference"
+          }`}
+          style={
+            visibleCursorPreviewImageSrc
+              ? {
+                  backgroundImage: `url(${visibleCursorPreviewImageSrc})`,
+                  width: cell,
+                  height: cell,
+                }
+              : undefined
+          }
+        >
+          {isOpenCaseCursorVisible ? (
+            <span className="px-4 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[#111]/72">
+              open case
+            </span>
+          ) : null}
+          {isCloseCaseCursorVisible ? (
+            <span className="px-4 text-center text-[10px] font-medium uppercase tracking-[0.16em] text-[#111]/72">
+              close case
+            </span>
+          ) : null}
+        </div>
       ) : null}
       {isLoading ? (
         <div
@@ -1108,8 +1763,8 @@ function PortfolioContent() {
       <div
         className={
           isHorizontalLayout
-            ? "flex min-h-0 flex-row flex-nowrap justify-between"
-            : "flex min-h-screen flex-col"
+            ? "relative flex min-h-0 flex-row flex-nowrap justify-between border-y border-[#111]/12"
+            : "relative flex min-h-screen flex-col border-y border-[#111]/12"
         }
         style={
           isHorizontalLayout
@@ -1135,7 +1790,7 @@ function PortfolioContent() {
             data-entrance
             className={splitPaneHeaderClass}
           >
-            <div className="pt-[2px]">
+            <div className={detailMarkerSlotClass}>
               <NumberBadge n={0} />
             </div>
             <h2 id="display-heading" className="sr-only">
@@ -1239,10 +1894,16 @@ function PortfolioContent() {
                     const isActive = from === activeCellIndex;
                     const isProfileTile = tile.id === ayuTile.id;
                     const tileImageSrc = tile.thumb;
+                    const isGallerySourceTile = galleryTileId === tile.id;
+                    const shouldFadeOutSourceTile = isGallerySourceTile && isGalleryOpen;
+                    const shouldHideSourceTile =
+                      isGallerySourceTile && isGalleryLifecycleActive;
                     const isMovable = currentEmptyIndices.some((emptyIdx) =>
                       isAdjacent(from, emptyIdx, grid.cols)
                     );
-                    const touchAction = getTileTouchAction(from, currentEmptyIndices, grid.cols);
+                    const touchAction = isGalleryOpen
+                      ? "auto"
+                      : getTileTouchAction(from, currentEmptyIndices, grid.cols);
                     return (
                       <button
                         key={tile.id}
@@ -1256,16 +1917,20 @@ function PortfolioContent() {
                         onKeyDown={onTileKeyDown(tile)}
                         className={[
                           "safari-transition-rounded absolute left-0 top-0 overflow-hidden",
+                          isActive ? "z-10" : "",
                           isActive
-                            ? "z-10 rounded-[10px] bg-[#f3f3f3] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
+                            ? "rounded-[10px] bg-[#f3f3f3] shadow-[0_0_0_2px_#e2e2e2,inset_0_1px_0_rgba(255,255,255,0.75)]"
                             : "rounded-[10px] bg-[#f3f3f3]",
+                          shouldHideSourceTile ? "opacity-0" : "opacity-100",
+                          shouldHideSourceTile && !shouldFadeOutSourceTile ? "invisible" : "visible",
+                          isGalleryOpen ? "pointer-events-none" : "",
                           !hasTileEnteredActiveCell && isActive ? "active-cell-pre-interaction-blink" : "",
                           "focus-visible:ring-2 focus-visible:ring-[#111]/20 outline-none",
-                          "transition-opacity duration-200",
+                          shouldFadeOutSourceTile ? "transition-opacity duration-400" : "transition-none",
                         ].join(" ")}
                         style={{ width: cell, height: cell, touchAction }}
                         aria-label={isActive ? `Tile: ${tile.title}. Active detail tile.` : `Tile: ${tile.title}`}
-                        aria-disabled={!isMovable}
+                        aria-disabled={!isMovable || isGalleryOpen}
                         aria-describedby="puzzle-instructions"
                         aria-keyshortcuts="ArrowLeft ArrowRight ArrowUp ArrowDown Enter Space"
                       >
@@ -1303,6 +1968,7 @@ function PortfolioContent() {
                 type="button"
                 onClick={shuffleTiles}
                 aria-controls="project-puzzle-board"
+                disabled={isGalleryOpen}
                 className={`${inlineActionControlClass} ${
                   isHorizontalLayout ? "shrink-0 whitespace-nowrap" : ""
                 }`}
@@ -1532,40 +2198,48 @@ function PortfolioContent() {
                       </div>
                     </DetailSection>
                   ) : null}
-                  {activeTile.links && activeTile.links.length > 0 ? (
-                    <DetailSection
-                      marker={<PlusBadge />}
-                      title="More"
-                      headingId={`details-${activeTile.id}-more`}
-                    >
-                      <div
-                        className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]"
-                        role="list"
-                      >
-                        {activeTile.id === "brnd" ? (
-                          <div role="listitem">
-                            Recent builds: Website refresh (Next.js/GSAP/AI), 23plusone
-                            research platform (with Sinyo Koene), internal operating
-                            systems.
-                          </div>
-                        ) : null}
-                        {activeTile.links.map((link) => (
-                          <div key={`${activeTile.id}-${link.label}-${link.href}`} role="listitem">
-                            <a
-                              href={link.href}
-                              target={link.href.startsWith("http") ? "_blank" : undefined}
-                              rel={link.href.startsWith("http") ? "noreferrer" : undefined}
-                              className={detailLinkClass}
-                            >
-                              {link.label}
-                            </a>
-                          </div>
-                        ))}
-                      </div>
-                    </DetailSection>
-                  ) : null}
                 </div>
               )}
+              {activeTile && hasGallery ? (
+                <div
+                  data-active-line
+                  className="mt-7 w-full"
+                  style={{ height: cell }}
+                >
+                  <div className="relative h-full min-h-full w-full">
+                    {!isHorizontalLayout ? (
+                      <button
+                        type="button"
+                        onClick={openGallery}
+                        aria-haspopup="dialog"
+                        aria-controls="project-gallery-overlay"
+                        aria-expanded={isGalleryOpen && galleryTileId === activeTile.id}
+                        className="inline-flex h-8 items-center rounded-full border border-[#111]/20 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 transition hover:bg-[#111]/4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
+                      >
+                        Open case
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={openGallery}
+                        onPointerEnter={() => {
+                          if (!isFinePointer) return;
+                          setIsOpenCaseHovering(true);
+                        }}
+                        onPointerLeave={() => {
+                          setIsOpenCaseHovering(false);
+                        }}
+                        aria-haspopup="dialog"
+                        aria-controls="project-gallery-overlay"
+                        aria-expanded={isGalleryOpen && galleryTileId === activeTile.id}
+                        className="absolute inset-0 block h-full w-full rounded-[10px] bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
+                      >
+                        <span className="sr-only">Open case</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : null}
             </article>
           </div>
 
@@ -1578,12 +2252,14 @@ function PortfolioContent() {
             }
           >
             <div className="flex w-full items-start justify-between gap-4 md:items-center md:py-1">
-              <span
-                aria-hidden="true"
-                className={markerBadgeClass}
-              >
-                i
-              </span>
+              <div className={`${detailMarkerSlotClass} shrink-0`}>
+                <span
+                  aria-hidden="true"
+                  className={markerBadgeClass}
+                >
+                  i
+                </span>
+              </div>
               <address className="min-w-0 flex-1 not-italic">
                 <p className="block whitespace-normal break-words lg:whitespace-nowrap lg:break-normal">
                   Ayu Koene · Amsterdam · Mexico · Remote · +31610672283 ·{" "}
@@ -1616,7 +2292,339 @@ function PortfolioContent() {
             </div>
           </aside>
         </section>
+
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 z-[100] bg-white transition-opacity duration-[820ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            isGalleryOpen ? "opacity-100" : "opacity-0"
+          }`}
+        />
       </div>
+
+      {galleryTile && floatingTileRect ? (
+        <div
+          ref={floatingTileRef}
+          aria-hidden="true"
+          className="safari-transition-rounded pointer-events-none fixed left-0 top-0 z-[132] overflow-hidden rounded-[10px] bg-[#f3f3f3] shadow-[0_24px_42px_rgba(17,17,17,0.2),0_0_0_1px_rgba(17,17,17,0.08),inset_0_1px_0_rgba(255,255,255,0.82)]"
+          style={{
+            left: floatingTileRect.left,
+            top: floatingTileRect.top,
+            width: floatingTileRect.width,
+            height: floatingTileRect.height,
+          }}
+        >
+          <div className="relative h-full w-full">
+            <Image
+              src={galleryTile.thumb}
+              alt=""
+              aria-hidden="true"
+              fill
+              sizes={`${Math.max(120, Math.round(floatingTileRect.width))}px`}
+              className="safari-loading-fix object-cover"
+            />
+          </div>
+        </div>
+      ) : null}
+
+      <button
+        type="button"
+        aria-label="Close gallery overlay"
+        onClick={closeGallery}
+        onPointerEnter={() => {
+          if (!isFinePointer) return;
+          setIsCloseCaseHovering(true);
+        }}
+        onPointerLeave={() => {
+          setIsCloseCaseHovering(false);
+        }}
+        className={`fixed inset-0 z-[108] transition-opacity duration-[820ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isGalleryOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+      />
+
+      <aside
+        id="project-gallery-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-label={galleryTile ? `${galleryTile.title} gallery` : "Project gallery"}
+        data-lenis-prevent
+        data-lenis-prevent-wheel
+        data-lenis-prevent-touch
+        className={`fixed z-[120] flex flex-col overflow-hidden border-l border-[#111]/12 bg-white transition-[transform,opacity] duration-[820ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+          isHorizontalLayout
+            ? "right-0 top-0 bottom-0"
+            : "left-0 right-0 bottom-0"
+        } ${
+          isGalleryOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        style={
+          isHorizontalLayout
+            ? {
+                left: desktopOverlayLeft,
+                transform: isGalleryOpen ? "translate3d(0,0,0)" : "translate3d(100%,0,0)",
+              }
+            : {
+                top: MOBILE_GALLERY_OVERLAY_TOP,
+                transform: isGalleryOpen ? "translate3d(0,0,0)" : "translate3d(0,100%,0)",
+            }
+        }
+      >
+        <div
+          data-lenis-prevent
+          data-lenis-prevent-wheel
+          data-lenis-prevent-touch
+          ref={galleryScrollRef}
+          className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-10 pb-8 md:px-14 md:pb-12"
+          style={{ WebkitOverflowScrolling: "touch", paddingTop: galleryContentTopPadding }}
+        >
+          {galleryTile ? (
+            <div className="space-y-4 md:space-y-5">
+              {galleryTile.galleryHeader ? (
+                <header className="w-full px-0 pt-0 pb-14 md:px-10 md:pt-0 md:pb-20">
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(180px,0.5fr)_minmax(0,0.5fr)] md:gap-0">
+                    {!isHorizontalLayout ? (
+                      <button
+                        type="button"
+                        onClick={closeGallery}
+                        className="w-fit inline-flex h-8 items-center rounded-full border border-[#111]/20 bg-white/90 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 backdrop-blur-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
+                      >
+                        Close case
+                      </button>
+                    ) : null}
+                    <div className="space-y-6 md:pr-8">
+                      {hasMetadataValue(galleryTile.galleryHeader.body) ? (
+                        <div className="space-y-1.5">
+                          <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/64 max-w-[42ch]">
+                            {galleryTile.galleryHeader.body}
+                          </p>
+                        </div>
+                      ) : null}
+                      {hasMetadataValue(galleryTile.galleryHeader.year) ? (
+                        <div className="space-y-1.5">
+                          <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/44">
+                            Year
+                          </p>
+                          <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/64">
+                            {galleryTile.galleryHeader.year}
+                          </p>
+                        </div>
+                      ) : null}
+                      {galleryTile.galleryHeader.deliverables.some((deliverable) =>
+                        hasMetadataValue(deliverable)
+                      ) ? (
+                        <div className="space-y-1.5">
+                          <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/44">
+                            Topics
+                          </p>
+                          <div className="space-y-0.5 text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/64">
+                            {galleryTile.galleryHeader.deliverables
+                              .filter((deliverable) => hasMetadataValue(deliverable))
+                              .map((deliverable) => (
+                                <p key={`${galleryTile.id}-deliverable-${deliverable}`}>{deliverable}</p>
+                              ))}
+                          </div>
+                        </div>
+                      ) : null}
+                      {hasMetadataValue(galleryTile.galleryHeader.collaborators) ? (
+                        <div className="space-y-1.5">
+                          <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/44">
+                            Collaborators
+                          </p>
+                          <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/64">
+                            {galleryTile.galleryHeader.collaborators}
+                          </p>
+                        </div>
+                      ) : null}
+                      {galleryTile.galleryHeader.credits.some((credit) => hasMetadataValue(credit)) ? (
+                        <div className="space-y-1.5">
+                          <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/44">
+                            Credits
+                          </p>
+                          <div className="space-y-0.5 text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/64">
+                            {galleryTile.galleryHeader.credits
+                              .filter((credit) => hasMetadataValue(credit))
+                              .map((credit) => (
+                                <p key={`${galleryTile.id}-credit-${credit}`}>{credit}</p>
+                              ))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                    <div className="md:border-l md:border-[#111]/14 md:pl-10">
+                      <h2 className="max-w-[14ch] text-[clamp(34px,5.4vw,56px)] font-semibold leading-[0.97] tracking-[-0.022em] text-[#111]">
+                        {galleryTile.galleryHeader.heroHeadline}
+                      </h2>
+                    </div>
+                  </div>
+                </header>
+              ) : null}
+              {galleryVideoSrc ? (
+                <div className="overflow-hidden rounded-[12px] bg-[#f1f1f1]">
+                  <div className="relative aspect-[4/3] w-full">
+                    <video
+                      key={`${galleryTile.id}-${galleryVideoSrc}`}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      controls={false}
+                      disablePictureInPicture
+                      disableRemotePlayback
+                      controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
+                      className="pointer-events-none h-full w-full object-cover"
+                      aria-label={`${galleryTile.title} gallery video`}
+                    >
+                      <source src={galleryVideoSrc} type="video/mp4" />
+                    </video>
+                  </div>
+                </div>
+              ) : null}
+              {galleryTile.id === "ayu" ? (
+                <section className="space-y-6 pb-2 md:space-y-8 md:pb-3">
+                  <p className="text-[14px] leading-[1.35] tracking-[0.01em] text-[#111]/44">
+                    Explore gallery for Ayu Koene
+                  </p>
+                  <div className="grid gap-6 md:grid-cols-[minmax(150px,0.26fr)_minmax(0,1fr)] md:gap-10">
+                    <p className="text-[14px] leading-[1.35] tracking-[0.01em] text-[#111]/44">
+                      Interests &amp; hobbies
+                    </p>
+                    <div className="space-y-5 text-[14px] leading-[1.55] tracking-[0.01em] text-[#111]/86">
+                      <p>{AYU_GALLERY_INTERESTS_PLACEHOLDER}</p>
+                      <p className="whitespace-pre-line">{AYU_GALLERY_BUSY_PLACEHOLDER}</p>
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+              {galleryTile.id === "tiny" && galleryImages.includes(TINY_TRAITS_IMAGE) ? (
+                <div className="overflow-hidden rounded-[12px] bg-[#f1f1f1]">
+                  <Image
+                    src={TINY_TRAITS_IMAGE}
+                    alt={`${galleryTile.title} traits`}
+                    width={1920}
+                    height={1080}
+                    sizes={isHorizontalLayout ? "54vw" : "100vw"}
+                    className="h-auto w-full"
+                  />
+                </div>
+              ) : null}
+              {galleryTile.id === "ayu" && ayuGalleryImages.length > 0 ? (
+                <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 md:gap-3 md:pb-2">
+                  {ayuGalleryImages.map((imageSrc, index) => (
+                    <div
+                      key={`${galleryTile.id}-row-${imageSrc}-${index}`}
+                      className="relative aspect-[4/5] w-[68vw] max-w-[260px] shrink-0 snap-start overflow-hidden rounded-[12px] bg-[#f1f1f1] md:w-[220px]"
+                    >
+                      <Image
+                        src={imageSrc}
+                        alt={`${galleryTile.title} gallery image ${index + 1}`}
+                        fill
+                        sizes="(min-width: 768px) 220px, 68vw"
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : galleryStandaloneImages.length > 0 ? (
+                <div className={galleryBentoGridClass}>
+                  {galleryStandaloneImages.map((imageSrc, index) => (
+                  <div
+                    key={`${galleryTile.id}-${imageSrc}-${index}`}
+                    className={`relative overflow-hidden rounded-[12px] bg-[#f1f1f1] ${getGalleryBentoSpanClass(
+                      index,
+                      galleryStandaloneImages.length
+                    )}`}
+                  >
+                    <Image
+                      src={imageSrc}
+                      alt={`${galleryTile.title} gallery image ${index + 1}`}
+                      fill
+                      sizes={isHorizontalLayout ? "26vw" : "44vw"}
+                      className="object-cover"
+                    />
+                  </div>
+                  ))}
+                </div>
+              ) : null}
+              {galleryTile.links && galleryTile.links.length > 0 ? (
+                galleryTile.id === "do" && doGalleryLinks ? (
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-6 md:gap-3">
+                    {doGalleryBentoLinks.map((link, index) => {
+                      const isExplainer =
+                        doGalleryLinks.explainer?.label === link.label &&
+                        doGalleryLinks.explainer?.href === link.href;
+                      const isResearchPaper = isResearchPaperLink(link);
+                      const isPortfolioPdf = isPortfolioPdfLink(link);
+                      const doPdfPreviewClassName =
+                        isResearchPaper || isPortfolioPdf
+                          ? "h-[62vh] md:h-[78vh]"
+                          : undefined;
+                      const doTileSpanClass = isExplainer
+                        ? "col-span-1 md:col-span-6"
+                        : isResearchPaper
+                          ? "col-span-1 md:col-span-2"
+                          : isPortfolioPdf
+                            ? "col-span-1 md:col-span-4"
+                            : getGalleryBentoSpanClass(index, doGalleryBentoLinks.length);
+                      return (
+                        <GalleryLinkCard
+                          key={`${galleryTile.id}-${link.label}-${link.href}`}
+                          link={link}
+                          projectTitle={galleryTile.title}
+                          isHorizontalLayout={isHorizontalLayout}
+                          autoPlayVideo={isExplainer}
+                          pdfPreviewClassName={doPdfPreviewClassName}
+                          className={doTileSpanClass}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className={galleryBentoGridClass}>
+                    {galleryTile.links.map((link, index, links) => (
+                      <GalleryLinkCard
+                        key={`${galleryTile.id}-${link.label}-${link.href}`}
+                        link={link}
+                        projectTitle={galleryTile.title}
+                        isHorizontalLayout={isHorizontalLayout}
+                        className={getGalleryBentoSpanClass(index, links.length)}
+                      />
+                    ))}
+                  </div>
+                )
+              ) : null}
+              {nextGalleryProject ? (
+                !isHorizontalLayout ? (
+                  <div className="flex w-full justify-end -mr-10 md:-mr-14">
+                    <button
+                      type="button"
+                      onClick={openNextGalleryProject}
+                      className="mt-5 inline-flex h-8 items-center rounded-full border border-[#111]/20 bg-white/90 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 backdrop-blur-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
+                    >
+                      Next project
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openNextGalleryProject}
+                    onMouseEnter={() => {
+                      if (!isFinePointer) return;
+                      setIsNextProjectHovering(true);
+                    }}
+                    onMouseLeave={() => {
+                      setIsNextProjectHovering(false);
+                    }}
+                    className="mt-1 block h-[50vh] w-full px-0 text-left text-[11px] uppercase tracking-[0.14em] text-[#111]/55 transition hover:text-[#111]/75 focus-visible:outline-none"
+                  >
+                    Next project
+                  </button>
+                )
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      </aside>
     </main>
   );
 }

@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# large media (host elsewhere or use LFS)
+public/images/projects/do/DO_explainer.mp4
