@@ -153,7 +153,7 @@ const AYU_GALLERY_DESCRIPTOR_PARTS = {
   afterArcticBeforeSinyo: "Arctic Fever",
   mid: ", and prototyping with my twin ",
   afterSinyo: "Sinyo",
-  end: ". On the move!",
+  end: ".",
 };
 const DIRECT_VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
 const VIDEO_POSTERS: Record<string, string> = {
@@ -2013,20 +2013,29 @@ function PortfolioContent() {
                 <div className="space-y-6">
                   <DetailSection
                     marker={<NumberBadge n={1} />}
-                    title="Profile"
+                    title={activeTile.title}
                     headingId="details-profile"
                   >
-                    <p className={detailBodyClass}>{activeTile.description}</p>
+                    <div className={detailBodyClass}>
+                      <div>{activeTile.roleLine}</div>
+                      <p className="mt-1">{renderProjectDescription(activeTile.description)}</p>
+                    </div>
                   </DetailSection>
                   <DetailSection
                     marker={<NumberBadge n={2} />}
                     title="Capabilities"
                     headingId="details-capabilities"
                   >
-                    <div className={detailBodyClass}>
-                      Strategy & product vision · Service & experience design · Hands-on prototyping
-                      & making · Systems thinking · Visual & interaction design · Research &
-                      synthesis · AI as creative tool · Engineering & technical collaboration
+                    <div
+                      className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]"
+                      role="list"
+                    >
+                      <div role="listitem">
+                        Strategy & product vision · Service & experience design · Hands-on
+                        prototyping & making · Systems thinking · Visual & interaction design ·
+                        Research & synthesis · AI as creative tool · Engineering & technical
+                        collaboration
+                      </div>
                     </div>
                   </DetailSection>
                   <DetailSection
@@ -2034,7 +2043,10 @@ function PortfolioContent() {
                     title="Education"
                     headingId="details-education"
                   >
-                    <div className={detailBodyClass} role="list">
+                    <div
+                      className="mt-1 space-y-1 text-[15px] leading-[1.7] text-[#111]/60 sm:text-[12px] sm:leading-[1.75]"
+                      role="list"
+                    >
                       <div role="listitem">
                         <a
                           href="https://www.masterdigitaldesign.com/alumni/ayu-koene"
@@ -2477,6 +2489,15 @@ function PortfolioContent() {
               {galleryTile.id === "ayu" ? (
                 <header className="w-full px-0 pt-0 pb-14 md:px-10 md:pt-0 md:pb-20">
                   <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(180px,0.5fr)_minmax(0,0.5fr)] md:gap-0">
+                    {!isHorizontalLayout ? (
+                      <button
+                        type="button"
+                        onClick={closeGallery}
+                        className="w-fit inline-flex h-8 items-center rounded-full border border-[#111]/20 bg-white/90 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 backdrop-blur-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
+                      >
+                        Close case
+                      </button>
+                    ) : null}
                     <div className="space-y-6 md:pr-8">
                       <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/64 max-w-[42ch]">
                         {AYU_GALLERY_DESCRIPTOR_PARTS.beforeArctic}
