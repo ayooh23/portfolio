@@ -147,20 +147,14 @@ const TINY_ROW_IMAGE_ORDER = [
   "/images/projects/tiny/tiny3.jpeg",
   "/images/thumb_tiny.jpeg",
 ];
-const AYU_GALLERY_BUSY_PLACEHOLDER =
-  `Placeholder:
-add
-what
-is
-currently
-keeping
-you
-busy
-outside
-client/project
-work.`;
-const AYU_GALLERY_INTERESTS_PLACEHOLDER =
-  "Placeholder: share a few interests, hobbies, and side obsessions (for example: movement, materials, music, outdoors, film, gaming, cooking).";
+const AYU_GALLERY_HEADING = "Trained to build, drawn to create.";
+const AYU_GALLERY_DESCRIPTOR_PARTS = {
+  beforeArctic: "My name is Ayu. Based in Amsterdam, frequently elsewhere. I work at the intersection of design, technology, and business, bridging vision and execution across whatever the project needs. I like to get things done, and done well. Outside of that: mountains, photography, tacos with ",
+  afterArcticBeforeSinyo: "Arctic Fever",
+  mid: ", and prototyping with my twin ",
+  afterSinyo: "Sinyo",
+  end: ". On the move!",
+};
 const DIRECT_VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
 const VIDEO_POSTERS: Record<string, string> = {
   "/images/projects/do/DO_explainer.mp4": "/images/projects/do/DO_explainer-Cover.jpg",
@@ -2481,20 +2475,37 @@ function PortfolioContent() {
                 </div>
               ) : null}
               {galleryTile.id === "ayu" ? (
-                <section className="space-y-6 pb-2 md:space-y-8 md:pb-3">
-                  <p className="text-[14px] leading-[1.35] tracking-[0.01em] text-[#111]/44">
-                    Explore gallery for Ayu Koene
-                  </p>
-                  <div className="grid gap-6 md:grid-cols-[minmax(150px,0.26fr)_minmax(0,1fr)] md:gap-10">
-                    <p className="text-[14px] leading-[1.35] tracking-[0.01em] text-[#111]/44">
-                      Interests &amp; hobbies
-                    </p>
-                    <div className="space-y-5 text-[14px] leading-[1.55] tracking-[0.01em] text-[#111]/86">
-                      <p>{AYU_GALLERY_INTERESTS_PLACEHOLDER}</p>
-                      <p className="whitespace-pre-line">{AYU_GALLERY_BUSY_PLACEHOLDER}</p>
+                <header className="w-full px-0 pt-0 pb-14 md:px-10 md:pt-0 md:pb-20">
+                  <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(180px,0.5fr)_minmax(0,0.5fr)] md:gap-0">
+                    <div className="space-y-6 md:pr-8">
+                      <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/64 max-w-[42ch]">
+                        {AYU_GALLERY_DESCRIPTOR_PARTS.beforeArctic}
+                        <a
+                          href="https://arcticfever.co/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline decoration-[#111]/44 underline-offset-2 hover:decoration-[#111]/64"
+                        >
+                          {AYU_GALLERY_DESCRIPTOR_PARTS.afterArcticBeforeSinyo}
+                        </a>
+                        {AYU_GALLERY_DESCRIPTOR_PARTS.mid}
+                        <button
+                          type="button"
+                          onClick={() => setGalleryTileId("brnd")}
+                          className="underline decoration-[#111]/44 underline-offset-2 hover:decoration-[#111]/64 text-left"
+                        >
+                          {AYU_GALLERY_DESCRIPTOR_PARTS.afterSinyo}
+                        </button>
+                        {AYU_GALLERY_DESCRIPTOR_PARTS.end}
+                      </p>
+                    </div>
+                    <div className="md:border-l md:border-[#111]/14 md:pl-10">
+                      <h2 className="max-w-[14ch] text-[clamp(34px,5.4vw,56px)] font-semibold leading-[0.97] tracking-[-0.022em] text-[#111]">
+                        {AYU_GALLERY_HEADING}
+                      </h2>
                     </div>
                   </div>
-                </section>
+                </header>
               ) : null}
               {galleryTile.id === "tiny" && galleryImages.includes(TINY_TRAITS_IMAGE) ? (
                 <div className="overflow-hidden rounded-[12px] bg-[#f1f1f1]">
@@ -2509,17 +2520,17 @@ function PortfolioContent() {
                 </div>
               ) : null}
               {galleryTile.id === "ayu" && ayuGalleryImages.length > 0 ? (
-                <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 md:gap-3 md:pb-2">
+                <div className="flex gap-2 overflow-x-auto pb-1 md:gap-2 md:pb-2">
                   {ayuGalleryImages.map((imageSrc, index) => (
                     <div
                       key={`${galleryTile.id}-row-${imageSrc}-${index}`}
-                      className="relative aspect-[4/5] w-[68vw] max-w-[260px] shrink-0 snap-start overflow-hidden rounded-[12px] bg-[#f1f1f1] md:w-[220px]"
+                      className="relative aspect-square w-[88px] shrink-0 overflow-hidden rounded-[8px] bg-[#f1f1f1] md:w-[112px]"
                     >
                       <Image
                         src={imageSrc}
                         alt={`${galleryTile.title} gallery image ${index + 1}`}
                         fill
-                        sizes="(min-width: 768px) 220px, 68vw"
+                        sizes="(min-width: 768px) 112px, 88px"
                         className="object-cover"
                       />
                     </div>

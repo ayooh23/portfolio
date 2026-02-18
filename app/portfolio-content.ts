@@ -66,7 +66,7 @@ export const PROJECTS: Project[] = [
       year: "2021-Present",
       deliverables: ["Service design systems", "Research and strategy", "Digital brand platforms"],
       heroHeadline: "Strategy only works if someone builds the systems to hold it.",
-      credits: ["Alexander Koene", "Kim Cramer"],
+      credits: ["Alexander Koene", "Kim Cramer", "Sinyo Koene"],
     },
   },
   {
@@ -117,7 +117,7 @@ export const PROJECTS: Project[] = [
       label: "Product",
       title: "Stroll",
       subheadline: "Navigation that feels like intuition, not instruction.",
-      body: "Stroll started from a simple frustration: why does getting from A to B mean staring at a screen the whole way? We built a haptic navigation device powered by AI, something you feel rather than watch. It went from concept to exhibition at Dutch Design Week 2024 and ThingsCon, and it's still one of the projects where the making and the thinking felt most inseparable.",
+      body: "Stroll started from a simple frustration: why does getting from A to B mean staring at a screen the whole way? We built a haptic navigation device powered by AI, something you feel rather than watch. It went from concept to exhibition at Dutch Design Week 2025 and ThingsCon, and it's still one of the projects where the making and the thinking felt most inseparable.",
       collaborators: "Monks",
       year: "2024-2025",
       deliverables: ["Haptic wayfinding", "AI interaction prototype", "Exhibition-ready concept"],
