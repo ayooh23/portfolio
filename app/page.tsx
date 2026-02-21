@@ -149,6 +149,21 @@ const TINY_ROW_IMAGE_ORDER = [
   "/images/projects/tiny/tiny3.jpeg",
   "/images/thumb_tiny.jpeg",
 ];
+const AYU_PERSONAL_IMAGE_ORDER = [
+  "/images/ayu03.jpg",
+  "/images/ayu08.jpg",
+  "/images/ayu10.jpg",
+  "/images/ayu18.jpg",
+  "/images/ayu25.jpg",
+];
+const AYU_PROJECT_IMAGE_ORDER = [
+  "/images/ClimateControl_architecture.png",
+  "/images/GrabAChair_CNCproduct.png",
+  "/images/AR_windtunnel.jpg",
+  "/images/Branding_RekelRegie_OutfoxIT.jpg",
+];
+// const AYU_PROJECT_GRID_CLASS =
+//   "grid grid-cols-1 gap-2 md:grid-cols-6 md:auto-rows-[clamp(112px,10vw,188px)] md:gap-3";
 const AYU_GALLERY_HEADING = "Trained to build, drawn to create.";
 const AYU_GALLERY_DESCRIPTOR_PARTS = {
   beforeArctic: "My name is Ayu. Based in Amsterdam, frequently elsewhere. I work at the intersection of design, technology, and business, bridging vision and execution across whatever the project needs. I like to get things done, and done well. Outside of that: mountains, photography, tacos with ",
@@ -216,9 +231,14 @@ function getYouTubeEmbedSrc(href: string) {
   return `https://www.youtube.com/embed/${safeVideoId}?${params.toString()}`;
 }
 
-function getPdfCoverEmbedSrc(href: string) {
+function getPdfSrc(href: string) {
   const [baseHref] = href.split("#");
-  return `${baseHref}#page=1&view=FitH&toolbar=0&navpanes=0&scrollbar=0`;
+  return baseHref;
+}
+
+function getPdfCoverEmbedSrc(href: string) {
+  const baseHref = getPdfSrc(href);
+  return `${baseHref}#page=1&zoom=page-fit&pagemode=none&toolbar=0&navpanes=0`;
 }
 
 function resolveGalleryLinkPreview(href: string): GalleryLinkPreview {
@@ -226,7 +246,7 @@ function resolveGalleryLinkPreview(href: string): GalleryLinkPreview {
   if (!trimmedHref) return { kind: "none" };
 
   if (isPdfHref(trimmedHref)) {
-    return { kind: "pdf", embedSrc: getPdfCoverEmbedSrc(trimmedHref) };
+    return { kind: "pdf", embedSrc: getPdfSrc(trimmedHref) };
   }
 
   const youTubeEmbedSrc = getYouTubeEmbedSrc(trimmedHref);
@@ -289,7 +309,9 @@ function GalleryLinkCard({
   const hasEmbed = preview.kind !== "none";
   const pdfEmbedSrc =
     preview.kind === "pdf"
-      ? `${preview.embedSrc}${preview.embedSrc.includes("#") ? "&" : "#"}page=1&zoom=page-fit&pagemode=none&toolbar=0&navpanes=0&scrollbar=0`
+      ? isHorizontalLayout
+        ? getPdfCoverEmbedSrc(preview.embedSrc)
+        : getPdfSrc(preview.embedSrc)
       : null;
   const [isVideoMuted, setIsVideoMuted] = useState(autoPlayVideo);
 
@@ -357,7 +379,9 @@ function GalleryLinkCard({
           ) : null}
           {preview.kind === "pdf" ? (
             <div
-              className={`relative w-full overflow-auto bg-white ${
+              className={`relative w-full bg-white ${
+                isHorizontalLayout ? "overflow-auto" : "overflow-hidden"
+              } ${
                 pdfPreviewClassName ?? "aspect-[3/4]"
               }`}
             >
@@ -367,6 +391,16 @@ function GalleryLinkCard({
                 loading="lazy"
                 className="h-full w-full border-0"
               />
+              {!isHorizontalLayout ? (
+                <a
+                  href={preview.embedSrc}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="absolute bottom-3 right-3 inline-flex items-center rounded-full border border-[#111]/15 bg-white/94 px-3 py-1 text-[10px] uppercase tracking-[0.13em] text-[#111]/74 shadow-[0_10px_22px_rgba(17,17,17,0.14)] backdrop-blur-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
+                >
+                  Open PDF
+                </a>
+              ) : null}
             </div>
           ) : null}
           {preview.kind === "webpage" ? (
@@ -440,10 +474,6 @@ function PortfolioContent() {
   const loaderSublineText = LOADER_SUBLINE_TEXT;
   const activeCellHintText = ACTIVE_CELL_HINT_TEXT;
   const ayuTile = AYU_TILE;
-  const allProjectSequenceImages = useMemo(
-    () => Array.from(new Set(Object.values(PROJECT_IMAGE_SEQUENCES).flat())),
-    []
-  );
 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const cursorDotRef = useRef<HTMLDivElement | null>(null);
@@ -545,11 +575,11 @@ function PortfolioContent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    for (const src of allProjectSequenceImages) {
+    for (const src of loadingGallery) {
       const img = new window.Image();
       img.src = src;
     }
-  }, [allProjectSequenceImages]);
+  }, [loadingGallery]);
 
   useEffect(() => {
     const overlayEl = loaderOverlayRef.current;
@@ -1063,6 +1093,14 @@ function PortfolioContent() {
     const sourceImages = sequence.length > 0 ? sequence : [galleryTile.thumb];
     return Array.from(new Set(sourceImages));
   }, [galleryTile]);
+  const ayuPersonalImages = useMemo(() => {
+    if (!galleryTile || galleryTile.id !== "ayu") return [];
+    return AYU_PERSONAL_IMAGE_ORDER.filter((src) => ayuGalleryImages.includes(src));
+  }, [ayuGalleryImages, galleryTile]);
+  const ayuProjectImages = useMemo(() => {
+    if (!galleryTile || galleryTile.id !== "ayu") return [];
+    return AYU_PROJECT_IMAGE_ORDER.filter((src) => ayuGalleryImages.includes(src));
+  }, [ayuGalleryImages, galleryTile]);
   const galleryVideoSrc = useMemo(
     () => (galleryTile ? PROJECT_GALLERY_VIDEOS[galleryTile.id] ?? null : null),
     [galleryTile]
@@ -2080,7 +2118,7 @@ function PortfolioContent() {
                     headingId="details-latest-explorations"
                   >
                     <div className={`${detailBodyClass} space-y-2`}>
-                      <div>Vibe coding</div>
+                      <div>Prompt-driven prototyping</div>
                       <div>
                         <a
                           href="?tile=brnd"
@@ -2550,22 +2588,49 @@ function PortfolioContent() {
                   />
                 </div>
               ) : null}
-              {galleryTile.id === "ayu" && ayuGalleryImages.length > 0 ? (
-                <div className="flex gap-2 overflow-x-auto pb-1 md:gap-2 md:pb-2">
-                  {ayuGalleryImages.map((imageSrc, index) => (
-                    <div
-                      key={`${galleryTile.id}-row-${imageSrc}-${index}`}
-                      className="relative aspect-square w-[88px] shrink-0 overflow-hidden rounded-[8px] bg-[#f1f1f1] md:w-[112px]"
-                    >
-                      <Image
-                        src={imageSrc}
-                        alt={`${galleryTile.title} gallery image ${index + 1}`}
-                        fill
-                        sizes="(min-width: 768px) 112px, 88px"
-                        className="object-cover"
-                      />
+              {galleryTile.id === "ayu" && (ayuPersonalImages.length > 0 || ayuProjectImages.length > 0) ? (
+                <div className="space-y-3">
+                  {ayuPersonalImages.length > 0 ? (
+                    <div className="flex gap-2 overflow-x-auto pb-1 md:gap-2 md:pb-2">
+                      {ayuPersonalImages.map((imageSrc, index) => (
+                        <div
+                          key={`${galleryTile.id}-personal-${imageSrc}-${index}`}
+                          className="relative aspect-square w-[88px] shrink-0 overflow-hidden rounded-[8px] bg-[#f1f1f1] md:w-[112px]"
+                        >
+                          <Image
+                            src={imageSrc}
+                            alt={`${galleryTile.title} image ${index + 1}`}
+                            fill
+                            sizes="(min-width: 768px) 112px, 88px"
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : null}
+                  {/*
+                  {ayuProjectImages.length > 0 ? (
+                    <div className={AYU_PROJECT_GRID_CLASS}>
+                      {ayuProjectImages.map((imageSrc, index) => (
+                        <div
+                          key={`${galleryTile.id}-project-${imageSrc}-${index}`}
+                          className={`relative overflow-hidden rounded-[12px] bg-[#f1f1f1] ${getGalleryBentoSpanClass(
+                            index,
+                            ayuProjectImages.length
+                          )}`}
+                        >
+                          <Image
+                            src={imageSrc}
+                            alt={`${galleryTile.title} project image ${index + 1}`}
+                            fill
+                            sizes={isHorizontalLayout ? "26vw" : "44vw"}
+                            className="object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  */}
                 </div>
               ) : galleryStandaloneImages.length > 0 ? (
                 <div className={galleryBentoGridClass}>

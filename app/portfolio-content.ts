@@ -203,7 +203,17 @@ export const AYU_TILE: Project = {
 export const TILES: Project[] = [...PROJECTS, AYU_TILE];
 
 export const PROJECT_IMAGE_SEQUENCES: Record<string, string[]> = {
-  ayu: LOADING_GALLERY,
+  ayu: [
+    "/images/ayu03.jpg",
+    "/images/ayu08.jpg",
+    "/images/ayu10.jpg",
+    "/images/ayu18.jpg",
+    "/images/ayu25.jpg",
+    "/images/ClimateControl_architecture.png",
+    "/images/GrabAChair_CNCproduct.png",
+    "/images/AR_windtunnel.jpg",
+    "/images/Branding_RekelRegie_OutfoxIT.jpg",
+  ],
   brnd: [
     "/images/thumb_br-ndpeople.jpg",
     "/images/projects/brnd/brnd1.jpg",
