@@ -127,6 +127,8 @@ const splitPaneHeaderClass =
 const splitPaneFooterBaseClass = "mt-4 min-h-[36px] text-[14px] leading-[1.75] sm:mt-3 sm:text-[12px]";
 const inlineActionControlClass =
   "group inline-flex h-9 items-center gap-3 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1";
+const openCaseButtonClass =
+  "inline-flex h-8 items-center rounded-full border border-[#111]/20 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 transition hover:bg-[#111]/4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25";
 const LOADER_SEEN_SESSION_KEY = "ayu-portfolio-loader-seen";
 const markerBadgeClass =
   "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#111]/72 text-[10px] leading-none text-[#111]/72";
@@ -997,6 +999,7 @@ function PortfolioContent() {
     }
     return null;
   }, [tiles, tilePos, activeCellIndex]);
+  const [hasOpenedGallery, setHasOpenedGallery] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryTileId, setGalleryTileId] = useState<string | null>(null);
   const [desktopOverlayLeft, setDesktopOverlayLeft] = useState<number>(0);
@@ -1089,6 +1092,12 @@ function PortfolioContent() {
         Boolean(PROJECT_GALLERY_VIDEOS[activeTile.id]) ||
         Boolean(activeTile.links && activeTile.links.length > 0))
   );
+  const shouldShowDesktopOpenCaseButton =
+    isHorizontalLayout &&
+    hasTileEnteredActiveCell &&
+    hasGallery &&
+    !isGalleryOpen &&
+    !hasOpenedGallery;
   const galleryOverlayTop = isHorizontalLayout ? 0 : MOBILE_GALLERY_OVERLAY_TOP;
   const galleryContentTopPadding = floatingTileRect
     ? Math.max(0, Math.round(floatingTileRect.top - galleryOverlayTop + floatingTileRect.height))
@@ -1125,6 +1134,7 @@ function PortfolioContent() {
     if (!activeTile) return;
     const rect = getTileRect(activeTile.id);
     clearGalleryOpeningTransitionTimeout();
+    setHasOpenedGallery(true);
     setIsGalleryOpeningTransition(true);
     setIsNextProjectHovering(false);
     setIsCloseCaseHovering(false);
@@ -2213,14 +2223,14 @@ function PortfolioContent() {
                   style={{ height: cell }}
                 >
                   <div className="relative h-full min-h-full w-full">
-                    {!isHorizontalLayout ? (
+                    {!isHorizontalLayout || shouldShowDesktopOpenCaseButton ? (
                       <button
                         type="button"
                         onClick={openGallery}
                         aria-haspopup="dialog"
                         aria-controls="project-gallery-overlay"
                         aria-expanded={isGalleryOpen && galleryTileId === activeTile.id}
-                        className="inline-flex h-8 items-center rounded-full border border-[#111]/20 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 transition hover:bg-[#111]/4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
+                        className={openCaseButtonClass}
                       >
                         Open case
                       </button>

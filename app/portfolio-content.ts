@@ -91,11 +91,17 @@ export const PROJECTS: Project[] = [
       title: "Dokter & Opvang",
       subheadline: "Designing care that doesn't stop at the exit door.",
       body: "OLVG is one of Amsterdam's largest hospitals, but this project lived in the gaps between institutions. What happens to a homeless patient after they're discharged? We designed the infrastructure to answer that, connecting hospitals, NGOs, and social services that had never been built to talk to each other. The work was technically complex, emotionally heavy, and exactly the kind of problem design should be solving.",
-      collaborators: "Deloitte Digital, OLVG, HvA",
+      collaborators:
+        "Deloitte Digital · OLVG Emergency Physician · Dr. Niels van der Naald · HvA · Frontline care teams · Social workers",
       year: "2024-2025",
       deliverables: ["Care pathway redesign", "Operational prototypes", "Cross-sector service toolkit"],
       heroHeadline: "We built the infrastructure for care that follows people into the hard parts.",
-      credits: ["Ayu Koene", "Frontline care teams", "Social workers"],
+      credits: [
+        "Ayu Koene · Concept direction + People & communications",
+        "Victor Jimoh · Interaction design & Prototyping",
+        "Františka Jirásková · Concept Support",
+        "Matin Mohammadi · Concept Support",
+      ],
     },
   },
   {
@@ -187,7 +193,7 @@ export const AYU_TILE: Project = {
   title: "Ayu Koene",
   roleLine: "Strategic designer",
   description:
-    "I'm Ayu, a strategic designer who started in mechanical engineering and ended up somewhere more interesting. I work at the intersection of design, technology, and business strategy: the place where vision meets execution and things actually get made. Outside of work, I'm usually cooking something ambitious, on a mountain with skis, or plotting the next trip somewhere I've never been.",
+    "My name is Ayu! I'm a product and strategic designer with a background in mechanical engineering, digital design, and business. I work from early concepts through shipped products - setting direction, designing experiences, and prototyping solutions. I’ve always been interested in building functional & appealing things, any shape or form.",
   bullets: [],
   thumb: "/images/ayu.jpg",
   links: [],
