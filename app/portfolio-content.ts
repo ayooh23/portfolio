@@ -233,5 +233,6 @@ export const PROJECT_IMAGE_SEQUENCES: Record<string, string[]> = {
     "/images/projects/tiny/tiny3.jpeg",
     "/images/thumb_tiny.jpeg",
     "/images/projects/tiny/tiny-traits.jpg",
+    "/images/tiny-troubles-bento.mp4",
   ],
 };

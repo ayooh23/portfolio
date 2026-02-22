@@ -133,7 +133,7 @@ const LOADER_SEEN_SESSION_KEY = "ayu-portfolio-loader-seen";
 const markerBadgeClass =
   "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#111]/72 text-[10px] leading-none text-[#111]/72";
 const galleryBentoGridClass =
-  "grid grid-cols-1 gap-2 md:grid-cols-6 md:auto-rows-[clamp(112px,10vw,188px)] md:gap-3";
+  "grid grid-cols-1 gap-2 md:grid-cols-6 md:gap-3";
 const overlaySettleEase = "power3.out";
 const overlayMotionDurationMs = 820;
 const overlayCleanupBufferMs = 220;
@@ -176,6 +176,11 @@ const DIRECT_VIDEO_EXTENSIONS = [".mp4", ".webm", ".ogg", ".mov", ".m4v"];
 const VIDEO_POSTERS: Record<string, string> = {
   "/images/projects/do/DO_explainer.mp4": "/images/projects/do/DO_explainer-Cover.jpg",
 };
+
+function isGalleryMediaVideo(src: string) {
+  const lower = src.toLowerCase();
+  return DIRECT_VIDEO_EXTENSIONS.some((ext) => lower.endsWith(ext));
+}
 
 type GalleryLinkPreview =
   | { kind: "none" }
@@ -2637,18 +2642,35 @@ function PortfolioContent() {
                   {galleryStandaloneImages.map((imageSrc, index) => (
                   <div
                     key={`${galleryTile.id}-${imageSrc}-${index}`}
-                    className={`relative overflow-hidden rounded-[12px] bg-[#f1f1f1] ${getGalleryBentoSpanClass(
+                    className={`relative w-full rounded-[12px] bg-[#f1f1f1] overflow-hidden ${isGalleryMediaVideo(imageSrc) ? "self-start" : "h-full min-h-0"} ${getGalleryBentoSpanClass(
                       index,
                       galleryStandaloneImages.length
                     )}`}
                   >
-                    <Image
-                      src={imageSrc}
-                      alt={`${galleryTile.title} gallery image ${index + 1}`}
-                      fill
-                      sizes={isHorizontalLayout ? "26vw" : "44vw"}
-                      className="object-cover"
-                    />
+                    {isGalleryMediaVideo(imageSrc) ? (
+                      <video
+                        src={imageSrc}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        controls={false}
+                        disablePictureInPicture
+                        disableRemotePlayback
+                        controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
+                        className="w-full h-auto max-w-full rounded-[12px]"
+                        aria-label={`${galleryTile.title} gallery video ${index + 1}`}
+                      />
+                    ) : (
+                      <Image
+                        src={imageSrc}
+                        alt={`${galleryTile.title} gallery image ${index + 1}`}
+                        fill
+                        sizes={isHorizontalLayout ? "26vw" : "44vw"}
+                        className="object-cover"
+                      />
+                    )}
                   </div>
                   ))}
                 </div>
