@@ -238,3 +238,13 @@ export const PROJECT_IMAGE_SEQUENCES: Record<string, string[]> = {
     "/images/tiny-troubles-bento.mp4",
   ],
 };
+
+export function getPortfolioDocumentPaths() {
+  const pdfRegex = /\.pdf(?:$|[?#])/i;
+  const paths = PROJECTS.flatMap((project) => project.links ?? [])
+    .map((link) => link.href.trim())
+    .filter((href) => href.startsWith("/") && pdfRegex.test(href))
+    .map((href) => href.split("#")[0]?.split("?")[0] ?? href);
+
+  return Array.from(new Set(paths));
+}

@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
+import { getPortfolioDocumentPaths } from "@/app/portfolio-content";
 import { getSiteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
   const now = new Date();
+  const documentPaths = getPortfolioDocumentPaths();
 
   const pages: Array<{
     path: string;
@@ -15,16 +17,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
-    {
-      path: "/documents/Evaluating_High-tech_Decision-making_Strategies_AyuKoene.pdf",
-      changeFrequency: "monthly",
+    ...documentPaths.map((path) => ({
+      path,
+      changeFrequency: "monthly" as const,
       priority: 0.5,
-    },
-    {
-      path: "/documents/MDD-RR-S2-AyuKoene.pdf",
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
+    })),
   ];
 
   return pages.map((page) => ({

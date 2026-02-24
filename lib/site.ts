@@ -31,7 +31,8 @@ export function isProductionIndexingEnabled() {
   const siteUrl = getSiteUrl();
   const isLocalhost = siteUrl.includes("localhost");
   const isVercelProduction = process.env.VERCEL_ENV === "production";
-  const hasExplicitPublicUrl = Boolean(process.env.NEXT_PUBLIC_SITE_URL) && !isLocalhost;
+  const hasExplicitPublicUrl = Boolean(process.env.NEXT_PUBLIC_SITE_URL);
+  const hasResolvablePublicUrl = !isLocalhost;
 
-  return hasExplicitPublicUrl || isVercelProduction;
+  return hasResolvablePublicUrl && (hasExplicitPublicUrl || isVercelProduction);
 }

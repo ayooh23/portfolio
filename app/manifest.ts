@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
+import { SITE_DEFAULT_TITLE, SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Ayu Koene · Strategic Designer",
-    short_name: "Ayu Koene",
-    description:
-      "Strategic designer with a background in mechanical engineering, digital design, and brand strategy.",
+    name: SITE_DEFAULT_TITLE,
+    short_name: SITE_NAME,
+    description: SITE_DESCRIPTION,
     start_url: "/",
     display: "standalone",
     background_color: "#f7f6f4",
