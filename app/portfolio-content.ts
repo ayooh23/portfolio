@@ -56,7 +56,7 @@ export const PROJECTS: Project[] = [
       "Client work: Research and strategy. Brand equity studies. Service design. Stakeholder alignment. Innovation programs. Healthcare, public sector, enterprise.",
     ],
     thumb: "/images/thumb_br-ndpeople.jpg",
-    links: [{ label: "Visit website", href: "https://br-ndpeople.com" }],
+    links: [],
     galleryHeader: {
       label: "Work",
       title: "BR-ND People",
@@ -218,6 +218,8 @@ export const PROJECT_IMAGE_SEQUENCES: Record<string, string[]> = {
     "/images/thumb_br-ndpeople.jpg",
     "/images/projects/brnd/brnd1.jpg",
     "/images/projects/brnd/brnd2.gif",
+    "/images/projects/brnd/23plusone-digital-scan.mp4",
+    "/images/projects/brnd/Website-Refresh-BR-NDPeople.mp4",
   ],
   do: [
     "/images/thumb_do.jpg",

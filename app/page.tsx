@@ -97,6 +97,19 @@ function getGalleryBentoSpanClass(index: number, total: number) {
     ];
     return threeItemPattern[index % threeItemPattern.length];
   }
+  if (total === 4) {
+    const fourItemPattern = [
+      // Large feature image
+      "aspect-[4/3] md:aspect-auto md:col-span-4 md:row-span-3",
+      // Top-right image (e.g. GIF), shares total height with next item
+      "aspect-[4/3] md:aspect-auto md:col-span-2 md:row-span-2",
+      // Bottom-right video, together with the above equals feature height
+      "aspect-[4/3] md:aspect-auto md:col-span-2 md:row-span-1",
+      // Full-width row below the first row (e.g. website refresh video)
+      "aspect-[4/3] md:aspect-auto md:col-span-6 md:row-span-2",
+    ];
+    return fourItemPattern[index % fourItemPattern.length];
+  }
 
   const pattern = [
     "aspect-[4/3] md:aspect-auto md:col-span-4 md:row-span-3",
@@ -133,7 +146,7 @@ const LOADER_SEEN_SESSION_KEY = "ayu-portfolio-loader-seen";
 const markerBadgeClass =
   "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-[#111]/72 text-[10px] leading-none text-[#111]/72";
 const galleryBentoGridClass =
-  "grid grid-cols-1 gap-2 md:grid-cols-6 md:gap-3";
+  "grid grid-cols-1 gap-2 md:grid-cols-6 md:auto-rows-[clamp(112px,10vw,188px)] md:gap-3";
 const overlaySettleEase = "power3.out";
 const overlayMotionDurationMs = 820;
 const overlayCleanupBufferMs = 220;
@@ -2638,18 +2651,56 @@ function PortfolioContent() {
                   */}
                 </div>
               ) : galleryStandaloneImages.length > 0 ? (
-                <div className={galleryBentoGridClass}>
-                  {galleryStandaloneImages.map((imageSrc, index) => (
-                  <div
-                    key={`${galleryTile.id}-${imageSrc}-${index}`}
-                    className={`relative w-full rounded-[12px] bg-[#f1f1f1] overflow-hidden ${isGalleryMediaVideo(imageSrc) ? "self-start" : "h-full min-h-0"} ${getGalleryBentoSpanClass(
-                      index,
-                      galleryStandaloneImages.length
-                    )}`}
-                  >
-                    {isGalleryMediaVideo(imageSrc) ? (
+                galleryTile.id === "brnd" && galleryStandaloneImages.length === 4 ? (
+                  <div className="grid grid-cols-1 gap-2 md:grid-cols-6 md:gap-3">
+                    {/* Left: main BR-ND image */}
+                    <div
+                      className="relative w-full rounded-[12px] bg-[#f1f1f1] overflow-hidden h-full min-h-0 aspect-[4/3] md:aspect-auto md:col-span-4 md:row-span-3"
+                    >
+                      <Image
+                        src={galleryStandaloneImages[0]}
+                        alt={`${galleryTile.title} gallery image 1`}
+                        fill
+                        sizes={isHorizontalLayout ? "26vw" : "44vw"}
+                        className="object-cover"
+                      />
+                    </div>
+                    {/* Right: GIF + 23plusone video stacked in one card */}
+                    <div
+                      className="relative w-full rounded-[12px] bg-[#f1f1f1] overflow-hidden h-full min-h-0 md:col-span-2 md:row-span-3"
+                    >
+                      <div className="flex h-full flex-col gap-2">
+                        <div className="relative aspect-[4/3] w-full overflow-hidden">
+                          <Image
+                            src={galleryStandaloneImages[1]}
+                            alt={`${galleryTile.title} gallery image 2`}
+                            fill
+                            sizes={isHorizontalLayout ? "13vw" : "44vw"}
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="relative aspect-[4/3] w-full overflow-hidden">
+                          <video
+                            src={galleryStandaloneImages[2]}
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            preload="metadata"
+                            controls={false}
+                            disablePictureInPicture
+                            disableRemotePlayback
+                            controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
+                            className="h-full w-full object-cover"
+                            aria-label={`${galleryTile.title} gallery video 3`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    {/* Full-width website refresh video below the first row */}
+                    <div className="relative w-full rounded-[12px] bg-[#f1f1f1] overflow-hidden md:col-span-6">
                       <video
-                        src={imageSrc}
+                        src={galleryStandaloneImages[3]}
                         autoPlay
                         muted
                         loop
@@ -2659,21 +2710,49 @@ function PortfolioContent() {
                         disablePictureInPicture
                         disableRemotePlayback
                         controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
-                        className="w-full h-auto max-w-full rounded-[12px]"
-                        aria-label={`${galleryTile.title} gallery video ${index + 1}`}
+                        className="h-full w-full object-cover"
+                        aria-label={`${galleryTile.title} gallery video 4`}
                       />
-                    ) : (
-                      <Image
-                        src={imageSrc}
-                        alt={`${galleryTile.title} gallery image ${index + 1}`}
-                        fill
-                        sizes={isHorizontalLayout ? "26vw" : "44vw"}
-                        className="object-cover"
-                      />
-                    )}
+                    </div>
                   </div>
-                  ))}
-                </div>
+                ) : (
+                  <div className={galleryBentoGridClass}>
+                    {galleryStandaloneImages.map((imageSrc, index) => (
+                      <div
+                        key={`${galleryTile.id}-${imageSrc}-${index}`}
+                        className={`relative w-full rounded-[12px] bg-[#f1f1f1] overflow-hidden ${isGalleryMediaVideo(imageSrc) ? "self-start" : "h-full min-h-0"} ${getGalleryBentoSpanClass(
+                          index,
+                          galleryStandaloneImages.length
+                        )}`}
+                      >
+                        {isGalleryMediaVideo(imageSrc) ? (
+                          <video
+                            src={imageSrc}
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            preload="metadata"
+                            controls={false}
+                            disablePictureInPicture
+                            disableRemotePlayback
+                            controlsList="nodownload noplaybackrate noremoteplayback nofullscreen"
+                            className="w-full h-auto max-w-full rounded-[12px]"
+                            aria-label={`${galleryTile.title} gallery video ${index + 1}`}
+                          />
+                        ) : (
+                          <Image
+                            src={imageSrc}
+                            alt={`${galleryTile.title} gallery image ${index + 1}`}
+                            fill
+                            sizes={isHorizontalLayout ? "26vw" : "44vw"}
+                            className="object-cover"
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
               ) : null}
               {galleryTile.links && galleryTile.links.length > 0 ? (
                 galleryTile.id === "do" && doGalleryLinks ? (
