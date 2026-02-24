@@ -13,6 +13,8 @@ export const inlineActionControlClass =
   "group inline-flex h-9 items-center gap-3 self-start rounded px-0 text-left cursor-pointer transition hover:text-[#111] focus-visible:outline focus-visible:ring-1 focus-visible:ring-[#111]/30 focus-visible:ring-offset-1";
 export const openCaseButtonClass =
   "inline-flex h-8 items-center rounded-full border border-[#111]/20 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 transition hover:bg-[#111]/4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25";
+export const galleryOverlayButtonClass =
+  "w-fit inline-flex h-8 items-center rounded-full border border-[#111] bg-[#111] px-3 text-[11px] uppercase tracking-[0.14em] text-white transition hover:bg-[#2a2a2a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/35";
 
 export const LOADER_SEEN_SESSION_KEY = "ayu-portfolio-loader-seen";
 export const markerBadgeClass =

@@ -31,6 +31,7 @@ import {
   galleryBentoGridClass,
   inlineActionControlClass,
   markerBadgeClass,
+  galleryOverlayButtonClass,
   openCaseButtonClass,
   overlayCleanupBufferMs,
   overlayMotionDurationMs,
@@ -1480,7 +1481,7 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
                   className="mt-7 w-full"
                   style={{ height: cell }}
                 >
-                  <div className="relative h-full min-h-full w-full">
+                  <div className="relative flex h-full min-h-full w-full items-center justify-center">
                     {!isHorizontalLayout || shouldShowDesktopOpenCaseButton ? (
                       <button
                         type="button"
@@ -1488,7 +1489,7 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
                         aria-haspopup="dialog"
                         aria-controls="project-gallery-overlay"
                         aria-expanded={isGalleryOpen && galleryTileId === activeTile.id}
-                        className={openCaseButtonClass}
+                        className={galleryOverlayButtonClass}
                       >
                         Open case
                       </button>
@@ -1649,7 +1650,10 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
           data-lenis-prevent-touch
           ref={galleryScrollRef}
           className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-10 pb-8 md:px-14 md:pb-12"
-          style={{ WebkitOverflowScrolling: "touch", paddingTop: galleryContentTopPadding }}
+          style={{
+            WebkitOverflowScrolling: "touch",
+            paddingTop: isHorizontalLayout ? galleryContentTopPadding : galleryContentTopPadding + 24,
+          }}
         >
           {galleryTile ? (
             <div className="space-y-4 md:space-y-5">
@@ -1657,13 +1661,15 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
                 <header className="w-full px-0 pt-0 pb-14 md:px-10 md:pt-0 md:pb-20">
                   <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(180px,0.5fr)_minmax(0,0.5fr)] md:gap-0">
                     {!isHorizontalLayout ? (
-                      <button
-                        type="button"
-                        onClick={closeGallery}
-                        className="w-fit inline-flex h-8 items-center rounded-full border border-[#111]/20 bg-white/90 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 backdrop-blur-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
-                      >
-                        Close case
-                      </button>
+                      <div className="flex justify-center pt-6 md:justify-start md:pt-0">
+                        <button
+                          type="button"
+                          onClick={closeGallery}
+                          className={galleryOverlayButtonClass}
+                        >
+                          Close case
+                        </button>
+                      </div>
                     ) : null}
                     <div className="space-y-6 md:pr-8">
                       {hasMetadataValue(galleryTile.galleryHeader.body) ? (
@@ -1758,13 +1764,15 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
                 <header className="w-full px-0 pt-0 pb-14 md:px-10 md:pt-0 md:pb-20">
                   <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(180px,0.5fr)_minmax(0,0.5fr)] md:gap-0">
                     {!isHorizontalLayout ? (
-                      <button
-                        type="button"
-                        onClick={closeGallery}
-                        className="w-fit inline-flex h-8 items-center rounded-full border border-[#111]/20 bg-white/90 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 backdrop-blur-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
-                      >
-                        Close case
-                      </button>
+                      <div className="flex justify-center pt-6 md:justify-start md:pt-0">
+                        <button
+                          type="button"
+                          onClick={closeGallery}
+                          className={galleryOverlayButtonClass}
+                        >
+                          Close case
+                        </button>
+                      </div>
                     ) : null}
                     <div className="space-y-6 md:pr-8">
                       <p className="text-[11px] leading-[1.4] tracking-[0.02em] text-[#111]/64 max-w-[42ch]">
@@ -2005,13 +2013,13 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
               ) : null}
               {nextGalleryProject ? (
                 !isHorizontalLayout ? (
-                  <div className="flex w-full justify-end -mr-10 md:-mr-14">
+                  <div className="flex w-full justify-center pt-6 md:justify-end md:pt-0 md:-mr-14">
                     <button
                       type="button"
                       onClick={openNextGalleryProject}
-                      className="mt-5 inline-flex h-8 items-center rounded-full border border-[#111]/20 bg-white/90 px-3 text-[11px] uppercase tracking-[0.14em] text-[#111]/72 backdrop-blur-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#111]/25"
+                      className={galleryOverlayButtonClass}
                     >
-                      Next project
+                      Next case
                     </button>
                   </div>
                 ) : (
@@ -2027,7 +2035,7 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
                     }}
                     className="mt-1 block h-[50vh] w-full px-0 text-left text-[11px] uppercase tracking-[0.14em] text-[#111]/55 transition hover:text-[#111]/75 focus-visible:outline-none"
                   >
-                    Next project
+                    Next case
                   </button>
                 )
               ) : null}
