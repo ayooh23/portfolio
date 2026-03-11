@@ -186,6 +186,40 @@ export const PROJECTS: Project[] = [
       ],
     },
   },
+  {
+    id: "eyay",
+    title: "eyay",
+    roleLine: "Product studio · 2025–Present",
+    description:
+      "Where ideas get built today. · Design and development studio in Amsterdam, working with small teams to turn concepts into working software — from internal workflows to consumer apps.",
+    bullets: [
+      "Reduce the gap between an idea and a working product so teams can make decisions with real software instead of slideware.",
+      "Design and build internal workflows, consumer apps, MVPs, and shipped products in short cycles — with no handoffs.",
+      "Use AI as leverage where it speeds iteration, never to lower the bar on craft or clarity.",
+    ],
+    thumb: "/images/projects/eyay/eyay.jpg",
+    links: [{ label: "Visit eyay.studio", href: "https://eyay.studio" }],
+    galleryHeader: {
+      label: "Studio",
+      title: "eyay",
+      subheadline: "Where ideas get built today.",
+      body: [
+        "Unlimited devs, one brand with all product explorations.",
+        "From internal workflows to consumer apps. From MVPs to shipped products.",
+        "Building becomes a daily practice: small teams ship high-quality products quickly, without bloated process or lost context.",
+      ].join(" "),
+      collaborators: "Studio partnerships with founders, product teams, and small organizations.",
+      year: "2025-Present",
+      deliverables: [
+        "Product strategy and scope shaping",
+        "Product design (UX/UI) and design systems",
+        "Full-stack development",
+        "AI-assisted workflows and feature integration",
+      ],
+      heroHeadline: "Making building feel instant: real software in days, not months.",
+      credits: ["Ayu Koene", "Sinyo Koene"],
+    },
+  },
 ];
 
 export const AYU_TILE: Project = {

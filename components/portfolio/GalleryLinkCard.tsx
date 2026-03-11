@@ -37,7 +37,7 @@ export default function GalleryLinkCard({
 
   return (
     <article
-      className={`h-full overflow-hidden rounded-[12px] bg-[#f3f3f3] shadow-[inset_0_0_0_1px_rgba(17,17,17,0.06)] ${className ?? ""}`}
+      className={`group h-full overflow-hidden rounded-[12px] bg-[#f3f3f3] shadow-[inset_0_0_0_1px_rgba(17,17,17,0.06)] ${className ?? ""}`}
     >
       {hasEmbed ? null : (
         <a
@@ -137,6 +137,15 @@ export default function GalleryLinkCard({
                 sandbox="allow-downloads allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-presentation allow-same-origin allow-scripts"
                 referrerPolicy="strict-origin-when-cross-origin"
               />
+              <a
+                href={link.href}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+                className="absolute inset-0 flex items-center justify-center bg-black/0 text-[11px] font-medium uppercase tracking-[0.14em] text-white opacity-0 transition duration-200 hover:bg-black/36 hover:opacity-100 focus-visible:bg-black/36 focus-visible:opacity-100 focus-visible:outline-none"
+              >
+                <span className="sr-only">{`Open ${projectTitle} ${link.label}`}</span>
+                <span aria-hidden="true">Visit website</span>
+              </a>
             </div>
           ) : null}
         </div>

@@ -103,7 +103,7 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
   const prevActiveIdRef = useRef<string | null>(null);
   const galleryOpeningTransitionTimeoutRef = useRef<number | null>(null);
 
-  // --- Layout knobs: 3x3 grid, 6 tiles + 3 empty
+  // --- Layout knobs: 3x3 grid, 7 tiles + 2 empty
   const grid: GridSize = { cols: 3, rows: 3 };
   const totalCells = grid.cols * grid.rows; // 9
   const activeCellIndex = 2; // top-right = active tile
@@ -175,7 +175,7 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
   // puzzle state: tile -> cellIndex (6 tiles; 3 cells empty at 2,4,6)
   const [tilePos, setTilePos] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
-    const order = [4, 8, 7, 3, 6, 0]; // empties at top-middle, top-right, middle-right
+    const order = [4, 8, 7, 3, 6, 0, 5]; // empties at top-middle and top-right
     tiles.forEach((t, i) => (initial[t.id] = order[i]));
 
     if (!requestedTileId) return initial;
@@ -1338,9 +1338,21 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
                     title="Latest explorations"
                     headingId="details-latest-explorations"
                   >
-                    <div className={`${detailBodyClass} space-y-2`}>
+                    <div className={`${detailBodyClass} space-y-1`}>
                       <div>Prompt-driven prototyping</div>
-                      <div>
+                      <div className="space-x-1">
+                        <a
+                          href="?tile=eyay"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            setActiveTileById("eyay");
+                          }}
+                          aria-controls="project-puzzle-board"
+                          className={detailLinkClass}
+                        >
+                          Founder EYAY
+                        </a>
+                        <span>·</span>
                         <a
                           href="?tile=brnd"
                           onClick={(event) => {
@@ -1350,7 +1362,7 @@ export default function PortfolioClient({ initialTileId }: PortfolioClientProps)
                           aria-controls="project-puzzle-board"
                           className={detailLinkClass}
                         >
-                          View current work at BR-ND People
+                          Design &amp; innovation lead at BR-ND People
                         </a>
                       </div>
                     </div>
