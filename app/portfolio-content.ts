@@ -175,7 +175,7 @@ export const PROJECTS: Project[] = [
       subheadline: "Causing trouble for all the right reasons.",
       body: "Tiny Troubles was something we built before we fully knew what we were building. A platform using Web3 to connect digital creativity with real social impact, started in 2019, before NFTs were either exciting or embarrassing. It didn't scale the way we hoped, but it taught me what early-stage product building actually costs: in time, in decisions, in learning to hold a vision while the ground keeps shifting.",
       collaborators: "(none)",
-      year: "2019-2021",
+      year: "2020-2022",
       deliverables: ["Venture concept", "Brand system", "Impact funding experiments"],
       heroHeadline: "We turned digital creativity into social impact before anyone called it Web3.",
       credits: [
